@@ -1,0 +1,41 @@
+{
+  "name": "react-example",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --port=3000 --host=0.0.0.0",
+    "build": "vite build && (cp -f public/totp-authenticator.apk dist/totp-authenticator.apk 2>/dev/null || true)",
+    "build:apk": "npm run build && rm -rf android/app/src/main/assets && mkdir -p android/app/src/main/assets && cp -r dist/* android/app/src/main/assets/ && rm -f android/app/src/main/assets/totp-authenticator.apk && cd android && gradle assembleRelease && cp app/build/outputs/apk/release/app-release.apk ../public/totp-authenticator.apk && cp app/build/outputs/apk/release/app-release.apk ../dist/totp-authenticator.apk",
+    "preview": "vite preview",
+    "test": "tsx --test src/domain/totp.test.ts src/crypto/crypto.test.ts",
+    "clean": "rm -rf dist server.js",
+    "lint": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@google/genai": "^2.4.0",
+    "@tailwindcss/vite": "^4.3.3",
+    "@vitejs/plugin-react": "^6.1.1",
+    "dotenv": "^17.2.3",
+    "express": "^4.21.2",
+    "jsqr": "^1.4.0",
+    "lucide-react": "^0.546.0",
+    "motion": "^12.23.24",
+    "react": "^19.0.1",
+    "react-dom": "^19.0.1",
+    "vite": "^8.3.0",
+    "vite-plugin-pwa": "^2.0.0"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^22.14.0",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "autoprefixer": "^10.4.21",
+    "esbuild": "^0.25.0",
+    "playwright": "^1.64.1",
+    "tailwindcss": "^4.3.3",
+    "tsx": "^4.21.0",
+    "typescript": "^7.0.2"
+  }
+}

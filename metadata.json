@@ -1,0 +1,10 @@
+{
+  "name": "کلیدبان - رمزساز دوعاملی امن و آفلاین (Kelidban)",
+  "description": "رمزساز دوعاملی کاملاً امن، آفلاین و متن‌باز (TOTP/HOTP) با رمزنگاری پیشرفته AES-256، تقویم جلالی و پشتیبانی کامل PWA",
+  "requestFramePermissions": [
+    "camera"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
