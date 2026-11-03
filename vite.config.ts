@@ -77,26 +77,27 @@ export default defineConfig(() => {
         },
         workbox: {
           globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
+          navigateFallback: null,
           runtimeCaching: [
             {
-              urlPattern: /.*/i,
-              handler: 'CacheFirst',
+              urlPattern: ({ request }) => request.mode === 'navigate',
+              handler: 'NetworkFirst',
               options: {
-                cacheName: 'kelidban-offline-cache',
-                expiration: {
-                  maxEntries: 100,
-                  maxAgeSeconds: 60 * 60 * 24 * 365,
-                },
-                cacheableResponse: {
-                  statuses: [0, 200],
-                },
+                cacheName: 'html-cache',
+                networkTimeoutSeconds: 3,
+              },
+            },
+            {
+              urlPattern: ({ request }) => request.destination === 'font' || request.destination === 'image',
+              handler: 'StaleWhileRevalidate',
+              options: {
+                cacheName: 'media-cache',
               },
             },
           ],
         },
         devOptions: {
-          enabled: true,
-          type: 'module',
+          enabled: false,
         },
       }),
     ],

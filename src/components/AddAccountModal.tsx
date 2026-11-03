@@ -70,6 +70,9 @@ export const AddAccountModal: React.FC<AddAccountModalProps> = ({
   useEffect(() => {
     if (!isOpen || activeTab !== 'scan') {
       stopCamera();
+      if (activeTab !== 'scan') {
+        setError('');
+      }
     } else if (isOpen && activeTab === 'scan') {
       startCamera();
     }
@@ -273,15 +276,15 @@ export const AddAccountModal: React.FC<AddAccountModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/70 sm:p-4 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="relative w-full max-w-lg rounded-t-[28px] sm:rounded-3xl border-t sm:border border-slate-800 bg-slate-900 p-4 sm:p-6 shadow-2xl overflow-hidden max-h-[92vh] sm:max-h-[90vh] flex flex-col text-slate-100 transition-colors">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-[#2b1313]/60 sm:p-4 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="relative w-full max-w-lg rounded-t-[28px] sm:rounded-3xl border-t sm:border border-[#efdcdc] bg-white p-4 sm:p-6 shadow-[0_20px_40px_-15px_rgba(90,20,20,0.2)] overflow-hidden max-h-[92vh] sm:max-h-[90vh] flex flex-col text-[#2b1313] transition-colors">
         {/* Mobile drag handle */}
-        <div className="mx-auto -mt-1 mb-2.5 h-1 w-10 rounded-full bg-slate-700 sm:hidden" />
+        <div className="mx-auto -mt-1 mb-2.5 h-1.5 w-12 rounded-full bg-[#efdcdc] sm:hidden" />
 
         {/* Header */}
-        <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-          <h2 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
-            <KeyRound className="h-5 w-5 text-indigo-400" />
+        <div className="flex items-center justify-between pb-3.5 border-b border-[#efdcdc]">
+          <h2 className="text-base sm:text-lg font-bold text-[#5a1414] flex items-center gap-2">
+            <KeyRound className="h-5 w-5 text-[#5a1414]" />
             {t('addAccount')}
           </h2>
           <button
@@ -290,21 +293,21 @@ export const AddAccountModal: React.FC<AddAccountModalProps> = ({
               onClose();
             }}
             aria-label="بستن"
-            className="flex h-9 w-9 items-center justify-center rounded-xl text-slate-400 hover:bg-slate-800 hover:text-slate-200 active:scale-90 transition"
+            className="flex h-10 w-10 sm:h-9 sm:w-9 items-center justify-center rounded-xl bg-[#fcf2f2] border border-[#efdcdc] text-[#7b6464] hover:bg-white hover:text-[#2b1313] active:scale-90 transition"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
         {/* Navigation Tabs */}
-        <div className="grid grid-cols-4 gap-1 p-1 my-3 rounded-xl bg-slate-950 border border-slate-800 text-[11px] sm:text-xs font-medium">
+        <div className="grid grid-cols-4 gap-1 p-1 my-3.5 rounded-xl bg-[#fcf2f2] border border-[#efdcdc] text-[11px] sm:text-xs font-semibold">
           <button
             type="button"
             onClick={() => setActiveTab('scan')}
             className={`flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-1.5 py-2 px-1 rounded-lg transition-all ${
               activeTab === 'scan'
-                ? 'bg-indigo-600 text-white shadow-sm'
-                : 'text-slate-400 hover:text-slate-200'
+                ? 'bg-gradient-to-r from-[#7d2323] to-[#5a1414] text-white shadow-sm'
+                : 'text-[#7b6464] hover:text-[#2b1313]'
             }`}
           >
             <Camera className="h-4 w-4 shrink-0" />
@@ -316,8 +319,8 @@ export const AddAccountModal: React.FC<AddAccountModalProps> = ({
             onClick={() => setActiveTab('paste')}
             className={`flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-1.5 py-2 px-1 rounded-lg transition-all ${
               activeTab === 'paste'
-                ? 'bg-indigo-600 text-white shadow-sm'
-                : 'text-slate-400 hover:text-slate-200'
+                ? 'bg-gradient-to-r from-[#7d2323] to-[#5a1414] text-white shadow-sm'
+                : 'text-[#7b6464] hover:text-[#2b1313]'
             }`}
           >
             <Link className="h-4 w-4 shrink-0" />
@@ -329,8 +332,8 @@ export const AddAccountModal: React.FC<AddAccountModalProps> = ({
             onClick={() => setActiveTab('image')}
             className={`flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-1.5 py-2 px-1 rounded-lg transition-all ${
               activeTab === 'image'
-                ? 'bg-indigo-600 text-white shadow-sm'
-                : 'text-slate-400 hover:text-slate-200'
+                ? 'bg-gradient-to-r from-[#7d2323] to-[#5a1414] text-white shadow-sm'
+                : 'text-[#7b6464] hover:text-[#2b1313]'
             }`}
           >
             <ImageIcon className="h-4 w-4 shrink-0" />
@@ -342,8 +345,8 @@ export const AddAccountModal: React.FC<AddAccountModalProps> = ({
             onClick={() => setActiveTab('manual')}
             className={`flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-1.5 py-2 px-1 rounded-lg transition-all ${
               activeTab === 'manual'
-                ? 'bg-indigo-600 text-white shadow-sm'
-                : 'text-slate-400 hover:text-slate-200'
+                ? 'bg-gradient-to-r from-[#7d2323] to-[#5a1414] text-white shadow-sm'
+                : 'text-[#7b6464] hover:text-[#2b1313]'
             }`}
           >
             <KeyRound className="h-4 w-4 shrink-0" />
@@ -351,10 +354,10 @@ export const AddAccountModal: React.FC<AddAccountModalProps> = ({
           </button>
         </div>
 
-        {/* Error / Warning Alert */}
+        {/* Error Alert */}
         {error && (
-          <div className="mb-4 flex items-center gap-2 rounded-xl bg-rose-500/15 border border-rose-500/30 p-3 text-xs text-rose-300">
-            <AlertCircle className="h-4 w-4 flex-shrink-0 text-rose-400" />
+          <div className="mb-4 flex items-center gap-2 rounded-xl bg-rose-50 border border-rose-200 p-3 text-xs text-rose-800">
+            <AlertCircle className="h-4 w-4 flex-shrink-0 text-rose-600" />
             <span>{error}</span>
           </div>
         )}
@@ -364,7 +367,7 @@ export const AddAccountModal: React.FC<AddAccountModalProps> = ({
           {/* TAB 1: Camera Scanner */}
           {activeTab === 'scan' && (
             <div className="flex flex-col items-center">
-              <div className="relative w-full aspect-square max-w-xs overflow-hidden rounded-2xl border-2 border-indigo-500/40 bg-slate-950 flex items-center justify-center shadow-inner">
+              <div className="relative w-full aspect-square max-w-xs overflow-hidden rounded-2xl border-2 border-[#5a1414] bg-[#2b1313] flex items-center justify-center shadow-inner">
                 <video
                   ref={videoRef}
                   playsInline
@@ -375,13 +378,13 @@ export const AddAccountModal: React.FC<AddAccountModalProps> = ({
 
                 {/* Scanning Laser Line */}
                 {isScanning && (
-                  <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-cyan-400 to-transparent shadow-[0_0_12px_#06b6d4] animate-pulse" />
+                  <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-[#d24a3a] to-transparent shadow-[0_0_12px_#d24a3a] animate-pulse" />
                 )}
 
                 {/* Target Corners */}
-                <div className="pointer-events-none absolute inset-6 border-2 border-dashed border-indigo-400/50 rounded-xl" />
+                <div className="pointer-events-none absolute inset-6 border-2 border-dashed border-[#f2c6c6] rounded-xl" />
               </div>
-              <p className="mt-3 text-xs text-slate-400 text-center">
+              <p className="mt-3 text-xs text-[#7b6464] text-center">
                 کد QR ارائه‌شده توسط سرویس مورد نظر را در کادر بالا قرار دهید.
               </p>
             </div>
@@ -391,7 +394,7 @@ export const AddAccountModal: React.FC<AddAccountModalProps> = ({
           {activeTab === 'paste' && (
             <form onSubmit={handlePasteSubmit} className="space-y-4">
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1.5">
+                <label className="block text-xs font-semibold text-[#2b1313] mb-1.5">
                   آدرس otpauth://
                 </label>
                 <textarea
@@ -400,12 +403,12 @@ export const AddAccountModal: React.FC<AddAccountModalProps> = ({
                   placeholder="otpauth://totp/GitHub:user?secret=JBSWY3DPEHPK3PXP&issuer=GitHub"
                   rows={4}
                   dir="ltr"
-                  className="w-full rounded-xl border border-slate-700 bg-slate-950 p-3 text-base sm:text-xs text-slate-100 placeholder-slate-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 font-mono"
+                  className="w-full rounded-xl border border-[#efdcdc] bg-[#fcf2f2] p-3 text-base sm:text-xs text-[#2b1313] placeholder-[#7b6464]/60 focus:bg-white focus:border-[#5a1414] focus:outline-none font-mono"
                 />
               </div>
               <button
                 type="submit"
-                className="w-full rounded-xl bg-indigo-600 py-3.5 text-sm font-semibold text-white shadow-lg shadow-indigo-600/30 hover:bg-indigo-500 transition active:scale-[0.99]"
+                className="w-full rounded-full bg-gradient-to-r from-[#7d2323] via-[#5a1414] to-[#390a0a] py-3.5 text-sm font-bold text-white shadow-lg shadow-[#5a1414]/25 hover:brightness-105 transition active:scale-[0.99]"
               >
                 {t('save')}
               </button>
@@ -414,13 +417,13 @@ export const AddAccountModal: React.FC<AddAccountModalProps> = ({
 
           {/* TAB 3: QR Image Upload */}
           {activeTab === 'image' && (
-            <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-700 bg-slate-950/60 p-6 sm:p-8 text-center hover:border-indigo-500/50 transition">
-              <ImageIcon className="h-10 w-10 text-indigo-400 mb-2" />
-              <p className="text-sm font-medium text-slate-200 mb-1">
+            <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-[#efdcdc] bg-[#fcf2f2] p-6 sm:p-8 text-center hover:border-[#5a1414] transition">
+              <ImageIcon className="h-10 w-10 text-[#5a1414] mb-2" />
+              <p className="text-sm font-semibold text-[#2b1313] mb-1">
                 تصویر کد QR را انتخاب یا بارگذاری کنید
               </p>
-              <p className="text-xs text-slate-500 mb-4">فرمت‌های PNG، JPG و WebP پشتیبانی می‌شوند</p>
-              <label className="cursor-pointer rounded-xl bg-indigo-600/20 border border-indigo-500/30 px-5 py-2.5 text-xs font-semibold text-indigo-300 hover:bg-indigo-600/30 transition">
+              <p className="text-xs text-[#7b6464] mb-4">فرمت‌های PNG، JPG و WebP پشتیبانی می‌شوند</p>
+              <label className="cursor-pointer rounded-full bg-white border border-[#efdcdc] px-5 py-2.5 text-xs font-bold text-[#5a1414] hover:bg-[#fffcfc] transition shadow-sm">
                 {t('importQrImage')}
                 <input
                   type="file"
@@ -440,7 +443,7 @@ export const AddAccountModal: React.FC<AddAccountModalProps> = ({
             <form onSubmit={handleManualSubmit} className="space-y-3.5">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-medium text-slate-300 mb-1">
+                  <label className="block text-xs font-semibold text-[#2b1313] mb-1">
                     {t('issuer')}
                   </label>
                   <input
@@ -448,12 +451,12 @@ export const AddAccountModal: React.FC<AddAccountModalProps> = ({
                     value={issuer}
                     onChange={(e) => setIssuer(e.target.value)}
                     placeholder={t('issuerPlaceholder')}
-                    className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2.5 text-base sm:text-xs text-slate-100 placeholder-slate-500 focus:border-indigo-500 focus:outline-none"
+                    className="w-full rounded-xl border border-[#efdcdc] bg-[#fcf2f2] px-3.5 py-3 text-base sm:text-xs text-[#2b1313] placeholder-[#7b6464]/60 focus:bg-white focus:border-[#5a1414] focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-slate-300 mb-1">
+                  <label className="block text-xs font-semibold text-[#2b1313] mb-1">
                     {t('accountName')}
                   </label>
                   <input
@@ -461,13 +464,13 @@ export const AddAccountModal: React.FC<AddAccountModalProps> = ({
                     value={account}
                     onChange={(e) => setAccount(e.target.value)}
                     placeholder={t('accountNamePlaceholder')}
-                    className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2.5 text-base sm:text-xs text-slate-100 placeholder-slate-500 focus:border-indigo-500 focus:outline-none"
+                    className="w-full rounded-xl border border-[#efdcdc] bg-[#fcf2f2] px-3.5 py-3 text-base sm:text-xs text-[#2b1313] placeholder-[#7b6464]/60 focus:bg-white focus:border-[#5a1414] focus:outline-none"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1">
+                <label className="block text-xs font-semibold text-[#2b1313] mb-1">
                   {t('secretKey')} *
                 </label>
                 <input
@@ -477,19 +480,19 @@ export const AddAccountModal: React.FC<AddAccountModalProps> = ({
                   onChange={(e) => setSecret(e.target.value)}
                   placeholder={t('secretKeyPlaceholder')}
                   required
-                  className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2.5 text-base sm:text-xs font-mono text-slate-100 placeholder-slate-500 focus:border-indigo-500 focus:outline-none uppercase"
+                  className="w-full rounded-xl border border-[#efdcdc] bg-[#fcf2f2] px-3.5 py-3 text-base sm:text-xs font-mono text-[#2b1313] placeholder-[#7b6464]/60 focus:bg-white focus:border-[#5a1414] focus:outline-none uppercase"
                 />
               </div>
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
                 <div>
-                  <label className="block text-xs font-medium text-slate-300 mb-1">
+                  <label className="block text-xs font-semibold text-[#2b1313] mb-1">
                     {t('type')}
                   </label>
                   <select
                     value={type}
                     onChange={(e) => setType(e.target.value as OtpType)}
-                    className="w-full rounded-xl border border-slate-700 bg-slate-950 px-2.5 py-2.5 text-base sm:text-xs text-slate-200 focus:border-indigo-500 focus:outline-none"
+                    className="w-full rounded-xl border border-[#efdcdc] bg-[#fcf2f2] px-2.5 py-2.5 text-base sm:text-xs text-[#2b1313] focus:bg-white focus:border-[#5a1414] focus:outline-none"
                   >
                     <option value="totp">TOTP (زمان)</option>
                     <option value="hotp">HOTP (شمارنده)</option>
@@ -497,13 +500,13 @@ export const AddAccountModal: React.FC<AddAccountModalProps> = ({
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-slate-300 mb-1">
+                  <label className="block text-xs font-semibold text-[#2b1313] mb-1">
                     {t('algorithm')}
                   </label>
                   <select
                     value={algorithm}
                     onChange={(e) => setAlgorithm(e.target.value as HashAlgorithm)}
-                    className="w-full rounded-xl border border-slate-700 bg-slate-950 px-2.5 py-2.5 text-base sm:text-xs text-slate-200 focus:border-indigo-500 focus:outline-none"
+                    className="w-full rounded-xl border border-[#efdcdc] bg-[#fcf2f2] px-2.5 py-2.5 text-base sm:text-xs text-[#2b1313] focus:bg-white focus:border-[#5a1414] focus:outline-none"
                   >
                     <option value="SHA-1">SHA-1</option>
                     <option value="SHA-256">SHA-256</option>
@@ -512,13 +515,13 @@ export const AddAccountModal: React.FC<AddAccountModalProps> = ({
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-slate-300 mb-1">
+                  <label className="block text-xs font-semibold text-[#2b1313] mb-1">
                     {t('digits')}
                   </label>
                   <select
                     value={digits}
                     onChange={(e) => setDigits(Number(e.target.value))}
-                    className="w-full rounded-xl border border-slate-700 bg-slate-950 px-2.5 py-2.5 text-base sm:text-xs text-slate-200 focus:border-indigo-500 focus:outline-none"
+                    className="w-full rounded-xl border border-[#efdcdc] bg-[#fcf2f2] px-2.5 py-2.5 text-base sm:text-xs text-[#2b1313] focus:bg-white focus:border-[#5a1414] focus:outline-none"
                   >
                     <option value={6}>6 رقم</option>
                     <option value={8}>8 رقم</option>
@@ -526,7 +529,7 @@ export const AddAccountModal: React.FC<AddAccountModalProps> = ({
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-slate-300 mb-1">
+                  <label className="block text-xs font-semibold text-[#2b1313] mb-1">
                     {type === 'totp' ? t('period') : t('counter')}
                   </label>
                   {type === 'totp' ? (
@@ -534,14 +537,14 @@ export const AddAccountModal: React.FC<AddAccountModalProps> = ({
                       type="number"
                       value={period}
                       onChange={(e) => setPeriod(Number(e.target.value))}
-                      className="w-full rounded-xl border border-slate-700 bg-slate-950 px-2.5 py-2.5 text-base sm:text-xs text-slate-200 focus:border-indigo-500 focus:outline-none"
+                      className="w-full rounded-xl border border-[#efdcdc] bg-[#fcf2f2] px-2.5 py-2.5 text-base sm:text-xs text-[#2b1313] focus:bg-white focus:border-[#5a1414] focus:outline-none"
                     />
                   ) : (
                     <input
                       type="number"
                       value={counter}
                       onChange={(e) => setCounter(Number(e.target.value))}
-                      className="w-full rounded-xl border border-slate-700 bg-slate-950 px-2.5 py-2.5 text-base sm:text-xs text-slate-200 focus:border-indigo-500 focus:outline-none"
+                      className="w-full rounded-xl border border-[#efdcdc] bg-[#fcf2f2] px-2.5 py-2.5 text-base sm:text-xs text-[#2b1313] focus:bg-white focus:border-[#5a1414] focus:outline-none"
                     />
                   )}
                 </div>
@@ -550,7 +553,7 @@ export const AddAccountModal: React.FC<AddAccountModalProps> = ({
               <div className="pt-2">
                 <button
                   type="submit"
-                  className="w-full rounded-xl bg-indigo-600 py-3.5 text-sm font-semibold text-white shadow-lg shadow-indigo-600/30 hover:bg-indigo-500 transition active:scale-[0.99]"
+                  className="w-full rounded-full bg-gradient-to-r from-[#7d2323] via-[#5a1414] to-[#390a0a] py-3.5 text-sm font-bold text-white shadow-lg shadow-[#5a1414]/25 hover:brightness-105 transition active:scale-[0.99]"
                 >
                   {t('save')}
                 </button>

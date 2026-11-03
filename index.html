@@ -1,27 +1,44 @@
 <!doctype html>
-<html lang="fa" dir="rtl" class="dark">
+<html lang="fa" dir="rtl">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    <title>کلیدبان - رمزساز دوعاملی امن و آفلاین (Kelidban)</title>
-    <meta name="description" content="رمزساز دوعاملی کاملاً امن، آفلاین و متن‌باز (TOTP/HOTP) با رمزنگاری پیشرفته AES-256، تقویم جلالی و پشتیبانی کامل PWA" />
+    <title>کلیدبان | ساخت کد ورود دو مرحله‌ای روی گوشی</title>
+    <meta name="description" content="کلیدبان کد ۶ رقمی ورود دو مرحله‌ای را روی گوشی شما می‌سازد؛ فارسی، ساده و بدون نیاز به پیامک." />
     <meta name="referrer" content="no-referrer" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob:; connect-src 'self'; worker-src 'self' blob:; media-src 'self' blob:; object-src 'none'; base-uri 'self';" />
+    <script>
+      // Clear legacy service worker caches to ensure immediate theme updates in preview
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(function(regs) {
+          for (var i = 0; i < regs.length; i++) {
+            regs[i].unregister();
+          }
+        });
+      }
+      if ('caches' in window) {
+        caches.keys().then(function(names) {
+          for (var i = 0; i < names.length; i++) {
+            caches.delete(names[i]);
+          }
+        });
+      }
+    </script>
 
-    <meta property="og:title" content="کلیدبان - رمزساز دوعاملی امن و آفلاین (Kelidban)" />
-    <meta property="og:description" content="رمزساز دوعاملی کاملاً امن، آفلاین و متن‌باز (TOTP/HOTP) با رمزنگاری پیشرفته AES-256، تقویم جلالی و پشتیبانی کامل PWA" />
+    <meta property="og:title" content="کلیدبان؛ نگهبان ورود شما" />
+    <meta property="og:description" content="کد ۶ رقمی ورود دو مرحله‌ای را روی گوشی خودتان بسازید؛ فارسی، ساده و بدون پیامک." />
     <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary_large_image" />
 
-    <meta name="theme-color" content="#020617" />
+    <meta name="theme-color" content="#5a1414" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="کلیدبان" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-    <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%235a1414'/%3E%3Cpath d='M16 6l8 3v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V9z' fill='none' stroke='%23fff' stroke-width='2' stroke-linejoin='round'/%3E%3Cpath d='M12.5 16l2.5 2.5 4.5-5' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E" />
   </head>
-  <body class="bg-slate-950 text-slate-100 antialiased selection:bg-indigo-500/30 selection:text-indigo-200">
+  <body class="bg-[#fffcfc] text-[#2b1313] antialiased selection:bg-[#f2c6c6] selection:text-[#5a1414]">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

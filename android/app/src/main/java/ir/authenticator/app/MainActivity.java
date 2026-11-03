@@ -61,14 +61,14 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
 
         try {
-            // Dark theme system bars
+            // Dark crimson theme system bars matching landing page
             Window window = getWindow();
             window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-            window.setStatusBarColor(Color.parseColor("#020617"));
-            window.setNavigationBarColor(Color.parseColor("#020617"));
+            window.setStatusBarColor(Color.parseColor("#120404"));
+            window.setNavigationBarColor(Color.parseColor("#120404"));
 
             webView = new WebView(this);
-            webView.setBackgroundColor(Color.parseColor("#020617"));
+            webView.setBackgroundColor(Color.parseColor("#120404"));
             setContentView(webView);
 
             WebSettings settings = webView.getSettings();

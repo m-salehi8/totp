@@ -23,9 +23,10 @@ import { AddAccountModal } from './components/AddAccountModal';
 import { EditAccountModal } from './components/EditAccountModal';
 import { SettingsModal } from './components/SettingsModal';
 import { DeleteConfirmModal } from './components/DeleteConfirmModal';
+import { LandingPage } from './components/LandingPage';
 import { Plus, Shield, KeyRound } from 'lucide-react';
 
-function AuthenticatorApp() {
+function AuthenticatorApp({ onOpenLanding }: { onOpenLanding?: () => void }) {
   const { t } = useI18n();
 
   // App & Vault State
@@ -376,8 +377,8 @@ function AuthenticatorApp() {
 
   if (isInitializing) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-950 text-slate-400">
-        <Shield className="h-10 w-10 text-indigo-500 animate-pulse" />
+      <div className="flex min-h-screen items-center justify-center bg-[#fffcfc] text-[#5a1414]">
+        <Shield className="h-12 w-12 text-[#5a1414] animate-pulse" />
       </div>
     );
   }
@@ -392,12 +393,13 @@ function AuthenticatorApp() {
         onBiometricUnlock={settings.biometricsEnabled ? handleBiometricUnlock : undefined}
         hasBiometrics={settings.biometricsEnabled}
         onResetVault={encryptedPayload ? handleResetVault : undefined}
+        onOpenLanding={onOpenLanding}
       />
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col selection:bg-indigo-500/30 selection:text-indigo-200">
+    <div className="min-h-screen bg-[#fffcfc] text-[#2b1313] flex flex-col selection:bg-[#f2c6c6] selection:text-[#5a1414]">
       {/* App Header */}
       <Header
         searchQuery={searchQuery}
@@ -405,20 +407,21 @@ function AuthenticatorApp() {
         onOpenAddModal={() => setIsAddModalOpen(true)}
         onOpenSettingsModal={() => setIsSettingsModalOpen(true)}
         onLockVault={handleLockVault}
+        onOpenLanding={onOpenLanding}
       />
 
       {/* Main Content Area */}
-      <main className="mx-auto w-full max-w-5xl flex-1 px-3 sm:px-4 py-3.5 sm:py-5 pb-[calc(env(safe-area-inset-bottom,0px)+6.5rem)] sm:pb-8">
+      <main className="mx-auto w-full max-w-5xl flex-1 px-3 sm:px-4 py-3.5 sm:py-5 pb-[calc(env(safe-area-inset-bottom,0px)+7rem)] sm:pb-8">
         {filteredAccounts.length === 0 ? (
-          <div className="flex flex-col items-center justify-center rounded-2xl sm:rounded-3xl border border-dashed border-slate-800 bg-slate-900/40 px-5 sm:px-6 py-12 sm:py-20 text-center backdrop-blur-md">
-            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-indigo-500/15 border border-indigo-500/25 text-indigo-400 mb-4 shadow-sm">
+          <div className="flex flex-col items-center justify-center rounded-2xl sm:rounded-3xl border border-[#efdcdc] bg-white px-5 sm:px-6 py-12 sm:py-20 text-center shadow-[0_8px_24px_-12px_rgba(90,20,20,0.12)]">
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#fcf2f2] border border-[#efdcdc] text-[#5a1414] mb-4 shadow-sm">
               <KeyRound className="h-8 w-8" />
             </div>
 
-            <h2 className="text-base sm:text-lg font-bold text-white mb-1">
+            <h2 className="text-base sm:text-lg font-bold text-[#2b1313] mb-1">
               {searchQuery ? 'حسابی یافت نشد' : t('noAccounts')}
             </h2>
-            <p className="text-xs text-slate-400 max-w-xs mb-6 leading-relaxed">
+            <p className="text-xs text-[#7b6464] max-w-xs mb-6 leading-relaxed">
               {searchQuery
                 ? 'نتیجه‌ای متناسب با عبارت جستجو پیدا نشد.'
                 : t('noAccountsDesc')}
@@ -426,7 +429,7 @@ function AuthenticatorApp() {
 
             <button
               onClick={() => setIsAddModalOpen(true)}
-              className="flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 text-xs sm:text-sm font-semibold text-white shadow-lg shadow-indigo-600/30 hover:bg-indigo-500 transition active:scale-95"
+              className="flex items-center gap-2 rounded-full bg-gradient-to-r from-[#7d2323] via-[#5a1414] to-[#390a0a] px-6 py-3.5 text-xs sm:text-sm font-bold text-white shadow-lg shadow-[#5a1414]/25 hover:brightness-105 transition active:scale-95"
             >
               <Plus className="h-4 w-4" />
               <span>{t('addAccount')}</span>
@@ -456,12 +459,12 @@ function AuthenticatorApp() {
         )}
       </main>
 
-      {/* Floating Add Button for Mobile (Thumb-accessible) */}
+      {/* Floating Add Button for Mobile (Thumb-accessible, large 56x56px matching landing mockup) */}
       <div className="fixed bottom-[calc(env(safe-area-inset-bottom,0px)+1.5rem)] end-5 z-30 sm:hidden">
         <button
           onClick={() => setIsAddModalOpen(true)}
           aria-label={t('addAccount')}
-          className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-tr from-indigo-600 to-indigo-500 text-white shadow-xl shadow-indigo-600/50 active:scale-90 transition border border-indigo-400/30"
+          className="flex h-14 w-14 items-center justify-center rounded-[18px] bg-[#5a1414] text-white shadow-[0_10px_20px_-8px_rgba(90,20,20,0.7)] active:scale-90 hover:brightness-110 transition border border-white/20"
         >
           <Plus className="h-7 w-7" />
         </button>
@@ -506,9 +509,44 @@ function AuthenticatorApp() {
 }
 
 export default function App() {
+  const [currentView, setCurrentView] = useState<'landing' | 'app'>(() => {
+    if (typeof window !== 'undefined' && window.location.hash === '#app') {
+      return 'app';
+    }
+    return 'landing';
+  });
+
+  useEffect(() => {
+    const handleHashChange = () => {
+      if (window.location.hash === '#app') {
+        setCurrentView('app');
+      } else if (!window.location.hash || window.location.hash === '#' || window.location.hash === '#top') {
+        setCurrentView('landing');
+      }
+    };
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
+
+  const handleOpenApp = () => {
+    window.location.hash = '#app';
+    setCurrentView('app');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleOpenLanding = () => {
+    window.location.hash = '';
+    setCurrentView('landing');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
     <I18nProvider>
-      <AuthenticatorApp />
+      {currentView === 'landing' ? (
+        <LandingPage onOpenApp={handleOpenApp} />
+      ) : (
+        <AuthenticatorApp onOpenLanding={handleOpenLanding} />
+      )}
     </I18nProvider>
   );
 }

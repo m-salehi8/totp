@@ -90,7 +90,7 @@ define(['./workbox-afac4cd2'], (function (workbox) { 'use strict';
     "revision": "08ca1366d4fedea648b119a476fab133"
   }, {
     "url": "index.html",
-    "revision": "411662dc941feed1e416e845f421f722"
+    "revision": "2c6d4c0d329b28f6f05b3000dee8db43"
   }, {
     "url": "icon.svg",
     "revision": "0e6cd3814a295ca0970c1f21c992a00d"
@@ -113,10 +113,13 @@ define(['./workbox-afac4cd2'], (function (workbox) { 'use strict';
     "url": "fonts/Vazirmatn-Bold.woff2",
     "revision": "7958481fe611c2574940c172068921bb"
   }, {
-    "url": "assets/index-CjlWTCFQ.js",
+    "url": "assets/index-Hxxznolo.js",
     "revision": null
   }, {
-    "url": "assets/index-CP_E8VoA.css",
+    "url": "assets/index-BRfeSyly.css",
+    "revision": null
+  }, {
+    "url": "assets/aistudio/index_228cc456.html",
     "revision": null
   }, {
     "url": "apple-touch-icon.png",

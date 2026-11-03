@@ -29,12 +29,27 @@
 :root {
   --font-sans: 'Vazirmatn', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
+  /* Landing page color theme (#5a1414 signature palette) */
+  --p: #5a1414;
+  --pd: #390a0a;
+  --pm: #7d2323;
+  --pl: #a63a3a;
+  --t1: #fcf2f2;
+  --t2: #f2c6c6;
+  --t3: #fffcfc;
+  --ink: #2b1313;
+  --mut: #7b6464;
+  --line: #efdcdc;
+  --ok: #2f8f5b;
 }
 
 html {
   font-family: var(--font-sans);
   -webkit-tap-highlight-color: transparent;
   user-select: none;
+  background-color: var(--t3);
+  color: var(--ink);
 }
 
 /* Allow text selection only in code and input areas */
@@ -49,11 +64,21 @@ body {
   padding-bottom: env(safe-area-inset-bottom, 0px);
   padding-top: env(safe-area-inset-top, 0px);
   overflow-x: hidden;
+  background-color: var(--t3);
+  color: var(--ink);
 }
 
 /* Monospace numeric style for OTP codes */
 .font-otp {
   font-family: var(--font-mono);
-  letter-spacing: 0.12em;
+  letter-spacing: 0.16em;
   font-variant-numeric: tabular-nums;
 }
+
+/* Touch ripple and smooth mobile touch feedback */
+.touch-target {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+
