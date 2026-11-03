@@ -3,40 +3,39 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    <title>کلیدبان | ساخت کد ورود دو مرحله‌ای روی گوشی</title>
-    <meta name="description" content="کلیدبان کد ۶ رقمی ورود دو مرحله‌ای را روی گوشی شما می‌سازد؛ فارسی، ساده و بدون نیاز به پیامک." />
+    <title>کلیدبان | رمزساز دوعاملی امن و آفلاین</title>
+    <meta name="description" content="رمزساز دوعاملی ۱۰۰٪ آفلاین ویژه آیفون و وب با استاندارد RFC 6238 و رمزنگاری بومی Web Crypto API" />
     <meta name="referrer" content="no-referrer" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob:; connect-src 'self'; worker-src 'self' blob:; media-src 'self' blob:; object-src 'none'; base-uri 'self';" />
-    <script>
-      // Clear legacy service worker caches to ensure immediate theme updates in preview
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.getRegistrations().then(function(regs) {
-          for (var i = 0; i < regs.length; i++) {
-            regs[i].unregister();
-          }
-        });
-      }
-      if ('caches' in window) {
-        caches.keys().then(function(names) {
-          for (var i = 0; i < names.length; i++) {
-            caches.delete(names[i]);
-          }
-        });
-      }
-    </script>
 
-    <meta property="og:title" content="کلیدبان؛ نگهبان ورود شما" />
-    <meta property="og:description" content="کد ۶ رقمی ورود دو مرحله‌ای را روی گوشی خودتان بسازید؛ فارسی، ساده و بدون پیامک." />
+    <!-- Open Graph & Social -->
+    <meta property="og:title" content="کلیدبان | رمزساز دوعاملی امن و آفلاین" />
+    <meta property="og:description" content="تولید کدهای ۶ رقمی یکبار مصرف (TOTP) کاملاً آفلاین روی گوشی، سازگار با استاندارد RFC 6238" />
     <meta property="og:type" content="website" />
-    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:card" content="summary" />
 
+    <!-- iOS & PWA Native Settings -->
     <meta name="theme-color" content="#5a1414" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="کلیدبان" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%235a1414'/%3E%3Cpath d='M16 6l8 3v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V9z' fill='none' stroke='%23fff' stroke-width='2' stroke-linejoin='round'/%3E%3Cpath d='M12.5 16l2.5 2.5 4.5-5' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E" />
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+
+    <!-- Service Worker Registration -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+          navigator.serviceWorker.register('/sw.js').then(function(reg) {
+            console.log('[PWA] ServiceWorker registered with scope:', reg.scope);
+          }).catch(function(err) {
+            console.warn('[PWA] ServiceWorker registration failed:', err);
+          });
+        });
+      }
+    </script>
   </head>
   <body class="bg-[#fffcfc] text-[#2b1313] antialiased selection:bg-[#f2c6c6] selection:text-[#5a1414]">
     <div id="root"></div>

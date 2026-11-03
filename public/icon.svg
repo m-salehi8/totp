@@ -1,22 +1,17 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
   <defs>
     <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#0f172a" />
-      <stop offset="50%" stop-color="#1e1b4b" />
-      <stop offset="100%" stop-color="#090d16" />
+      <stop offset="0%" stop-color="#5a1414" />
+      <stop offset="55%" stop-color="#4a1010" />
+      <stop offset="100%" stop-color="#240505" />
     </linearGradient>
     <linearGradient id="shieldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#6366f1" />
-      <stop offset="50%" stop-color="#8b5cf6" />
-      <stop offset="100%" stop-color="#d946ef" />
-    </linearGradient>
-    <linearGradient id="cyanGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#06b6d4" />
-      <stop offset="100%" stop-color="#3b82f6" />
+      <stop offset="0%" stop-color="#a63a3a" />
+      <stop offset="50%" stop-color="#7d2323" />
+      <stop offset="100%" stop-color="#5a1414" />
     </linearGradient>
     <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-      <feGaussianBlur stdDeviation="10" result="blur" />
-      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+      <feDropShadow dx="0" dy="8" stdDeviation="16" flood-color="#5a1414" flood-opacity="0.35" />
     </filter>
   </defs>
 
@@ -24,20 +19,10 @@
   <rect width="512" height="512" rx="112" fill="url(#bgGrad)" />
 
   <!-- Outer timer ring (circular countdown symbol) -->
-  <circle cx="256" cy="256" r="190" fill="none" stroke="#1e293b" stroke-width="16" />
-  <circle cx="256" cy="256" r="190" fill="none" stroke="url(#cyanGrad)" stroke-width="16" stroke-linecap="round" stroke-dasharray="1194" stroke-dashoffset="360" />
+  <circle cx="256" cy="256" r="185" fill="none" stroke="#7d2323" stroke-width="12" opacity="0.3" />
+  <circle cx="256" cy="256" r="185" fill="none" stroke="#f2c6c6" stroke-width="12" stroke-linecap="round" stroke-dasharray="1162" stroke-dashoffset="350" />
 
   <!-- Shield Base -->
-  <path d="M 256 110 L 370 160 C 370 270 295 348 256 385 C 217 348 142 270 142 160 Z" fill="url(#shieldGrad)" filter="url(#glow)" />
-  <path d="M 256 130 L 350 172 C 350 262 288 330 256 362 C 224 330 162 262 162 172 Z" fill="#0f172a" opacity="0.88" />
-
-  <!-- Keyhole & Lock Symbol -->
-  <circle cx="256" cy="225" r="32" fill="url(#cyanGrad)" />
-  <path d="M 242 238 L 270 238 L 278 305 L 234 305 Z" fill="url(#cyanGrad)" />
-  <circle cx="256" cy="225" r="14" fill="#0f172a" />
-
-  <!-- Digits / Authenticator indicator tick marks -->
-  <circle cx="256" cy="90" r="7" fill="#06b6d4" />
-  <circle cx="422" cy="256" r="7" fill="#8b5cf6" />
-  <circle cx="90" cy="256" r="7" fill="#06b6d4" />
+  <path d="M 256 120 L 372 168 C 372 272 300 354 256 388 C 212 354 140 272 140 168 Z" fill="none" stroke="#ffffff" stroke-width="26" stroke-linejoin="round" filter="url(#glow)" />
+  <path d="M 205 256 L 244 295 L 314 212" fill="none" stroke="#ffffff" stroke-width="26" stroke-linecap="round" stroke-linejoin="round" />
 </svg>

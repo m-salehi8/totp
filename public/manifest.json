@@ -1,0 +1,34 @@
+{
+  "id": "/",
+  "name": "کلیدبان - رمزساز دوعاملی امن",
+  "short_name": "کلیدبان",
+  "description": "رمزساز دوعاملی ۱۰۰٪ آفلاین ویژه آیفون و وب با پشتیبانی از استاندارد RFC 6238",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#5a1414",
+  "background_color": "#fffcfc",
+  "lang": "fa",
+  "dir": "rtl",
+  "icons": [
+    {
+      "src": "/pwa-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/pwa-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/pwa-maskable-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

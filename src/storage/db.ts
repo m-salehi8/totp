@@ -1,8 +1,9 @@
-import type { AppSettings, EncryptedPayload } from '../domain/types';
+import type { AppSettings, EncryptedPayload, OtpAccount } from '../domain/types';
 
 const DB_NAME = 'kelidban_db';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 const VAULT_STORE = 'vault_store';
+const PLAIN_ACCOUNTS_STORE = 'plain_accounts_store';
 const SETTINGS_STORE = 'settings_store';
 
 const DEFAULT_SETTINGS: AppSettings = {
@@ -11,6 +12,8 @@ const DEFAULT_SETTINGS: AppSettings = {
   hideCodesByDefault: false,
   clipboardClearSeconds: 30,
   biometricsEnabled: false,
+  pinEnabled: false,
+  dismissedIosGuide: false,
 };
 
 function openDb(): Promise<IDBDatabase> {
@@ -26,6 +29,9 @@ function openDb(): Promise<IDBDatabase> {
       const db = (event.target as IDBOpenDBRequest).result;
       if (!db.objectStoreNames.contains(VAULT_STORE)) {
         db.createObjectStore(VAULT_STORE, { keyPath: 'id' });
+      }
+      if (!db.objectStoreNames.contains(PLAIN_ACCOUNTS_STORE)) {
+        db.createObjectStore(PLAIN_ACCOUNTS_STORE, { keyPath: 'id' });
       }
       if (!db.objectStoreNames.contains(SETTINGS_STORE)) {
         db.createObjectStore(SETTINGS_STORE, { keyPath: 'id' });
@@ -43,12 +49,17 @@ function openDb(): Promise<IDBDatabase> {
 export async function saveEncryptedVault(payload: EncryptedPayload): Promise<void> {
   const db = await openDb();
   return new Promise((resolve, reject) => {
-    const tx = db.transaction(VAULT_STORE, 'readwrite');
-    const store = tx.objectStore(VAULT_STORE);
-    const req = store.put({ id: 'primary_vault', payload, updatedAt: Date.now() });
+    const tx = db.transaction([VAULT_STORE, PLAIN_ACCOUNTS_STORE], 'readwrite');
+    const vaultStore = tx.objectStore(VAULT_STORE);
+    const plainStore = tx.objectStore(PLAIN_ACCOUNTS_STORE);
 
-    req.onsuccess = () => resolve();
-    req.onerror = () => reject(req.error || new Error('Failed to save vault'));
+    // Save encrypted payload
+    vaultStore.put({ id: 'primary_vault', payload, updatedAt: Date.now() });
+    // Remove plain accounts so secrets are never in plain text when encrypted
+    plainStore.delete('primary_accounts');
+
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error || new Error('Failed to save vault'));
   });
 }
 
@@ -71,17 +82,54 @@ export async function loadEncryptedVault(): Promise<EncryptedPayload | null> {
 }
 
 /**
+ * Saves accounts directly to IndexedDB when PIN lock is disabled.
+ */
+export async function savePlainAccounts(accounts: OtpAccount[]): Promise<void> {
+  const db = await openDb();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction([PLAIN_ACCOUNTS_STORE, VAULT_STORE], 'readwrite');
+    const plainStore = tx.objectStore(PLAIN_ACCOUNTS_STORE);
+    const vaultStore = tx.objectStore(VAULT_STORE);
+
+    plainStore.put({ id: 'primary_accounts', accounts, updatedAt: Date.now() });
+    // Clear encrypted vault since PIN lock is disabled
+    vaultStore.delete('primary_vault');
+
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error || new Error('Failed to save accounts'));
+  });
+}
+
+/**
+ * Loads plain accounts from IndexedDB when PIN lock is disabled.
+ */
+export async function loadPlainAccounts(): Promise<OtpAccount[] | null> {
+  const db = await openDb();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(PLAIN_ACCOUNTS_STORE, 'readonly');
+    const store = tx.objectStore(PLAIN_ACCOUNTS_STORE);
+    const req = store.get('primary_accounts');
+
+    req.onsuccess = () => {
+      const result = req.result;
+      resolve(result && Array.isArray(result.accounts) ? result.accounts : null);
+    };
+    req.onerror = () => reject(req.error || new Error('Failed to load accounts'));
+  });
+}
+
+/**
  * Deletes the vault completely (for factory reset)
  */
 export async function deleteVault(): Promise<void> {
   const db = await openDb();
   return new Promise((resolve, reject) => {
-    const tx = db.transaction(VAULT_STORE, 'readwrite');
-    const store = tx.objectStore(VAULT_STORE);
-    const req = store.delete('primary_vault');
+    const tx = db.transaction([VAULT_STORE, PLAIN_ACCOUNTS_STORE], 'readwrite');
+    tx.objectStore(VAULT_STORE).delete('primary_vault');
+    tx.objectStore(PLAIN_ACCOUNTS_STORE).delete('primary_accounts');
 
-    req.onsuccess = () => resolve();
-    req.onerror = () => reject(req.error || new Error('Failed to delete vault'));
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error || new Error('Failed to delete vault'));
   });
 }
 

@@ -10,7 +10,7 @@ interface CountdownRingProps {
 export const CountdownRing: React.FC<CountdownRingProps> = ({
   remainingSeconds,
   period,
-  size = 36,
+  size = 38,
   strokeWidth = 3.5,
 }) => {
   const radius = (size - strokeWidth) / 2;
@@ -18,12 +18,16 @@ export const CountdownRing: React.FC<CountdownRingProps> = ({
   const progress = Math.max(0, Math.min(1, remainingSeconds / period));
   const strokeDashoffset = circumference * (1 - progress);
 
-  // Dynamic color alert as time runs down
-  let ringColor = 'stroke-[#5a1414] text-[#7b6464]';
+  // Dynamic color alert as time runs down (Crimson -> Amber -> Dark Red)
+  let ringColor = 'stroke-[#5a1414]';
+  let textColor = 'text-[#5a1414]';
+
   if (remainingSeconds <= 5) {
-    ringColor = 'stroke-[#d24a3a] text-[#d24a3a] animate-pulse';
+    ringColor = 'stroke-[#d24a3a] animate-pulse';
+    textColor = 'text-[#d24a3a]';
   } else if (remainingSeconds <= 10) {
-    ringColor = 'stroke-amber-600 text-amber-700';
+    ringColor = 'stroke-amber-600';
+    textColor = 'text-amber-700';
   }
 
   return (
@@ -60,11 +64,7 @@ export const CountdownRing: React.FC<CountdownRingProps> = ({
           fill="none"
         />
       </svg>
-      <span
-        className={`absolute font-mono text-xs font-bold tabular-nums ${
-          remainingSeconds <= 5 ? 'text-[#d24a3a]' : 'text-[#7b6464]'
-        }`}
-      >
+      <span className={`absolute font-mono text-[11px] font-bold tabular-nums ${textColor}`}>
         {Math.ceil(remainingSeconds)}
       </span>
     </div>

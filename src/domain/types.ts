@@ -6,7 +6,7 @@ export interface OtpAccount {
   id: string;
   issuer: string;
   account: string;
-  secret: string; // Base32 encoded secret
+  secret: string; // Base32 encoded secret (plain in memory / encrypted in vault payload)
   type: OtpType;
   algorithm: HashAlgorithm;
   digits: number; // usually 6 or 8
@@ -42,5 +42,7 @@ export interface AppSettings {
   hideCodesByDefault: boolean;
   clipboardClearSeconds: number; // default 30
   biometricsEnabled: boolean;
+  pinEnabled: boolean; // optional PIN/Passcode lock screen
+  dismissedIosGuide?: boolean;
   webauthnCredentialId?: string;
 }

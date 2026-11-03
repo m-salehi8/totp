@@ -8,6 +8,7 @@ import {
   Eye,
   EyeOff,
   RefreshCw,
+  Sparkles,
 } from 'lucide-react';
 import { useI18n } from '../i18n/i18nContext';
 
@@ -15,6 +16,7 @@ interface UnlockScreenProps {
   isFirstRun: boolean;
   onUnlock: (password: string) => Promise<boolean>;
   onSetupVault: (password: string) => Promise<void>;
+  onSkipPin?: () => void;
   onBiometricUnlock?: () => Promise<boolean>;
   hasBiometrics: boolean;
   onResetVault?: () => void;
@@ -25,6 +27,7 @@ export const UnlockScreen: React.FC<UnlockScreenProps> = ({
   isFirstRun,
   onUnlock,
   onSetupVault,
+  onSkipPin,
   onBiometricUnlock,
   hasBiometrics,
   onResetVault,
@@ -38,29 +41,28 @@ export const UnlockScreen: React.FC<UnlockScreenProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
 
-  // Password strength score (0-4)
-  const getPasswordStrength = (pass: string) => {
-    let score = 0;
-    if (pass.length >= 8) score++;
-    if (pass.length >= 12) score++;
-    if (/[A-Z]/.test(pass) && /[a-z]/.test(pass)) score++;
-    if (/\d/.test(pass) && /[^A-Za-z0-9]/.test(pass)) score++;
-    return score;
+  // Quick PIN keypad press
+  const handleKeypadPress = (digit: string) => {
+    if (password.length < 8) {
+      setPassword((prev) => prev + digit);
+    }
   };
 
-  const strength = getPasswordStrength(password);
+  const handleKeypadBackspace = () => {
+    setPassword((prev) => prev.slice(0, -1));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
     if (isFirstRun) {
-      if (password.length < 8) {
-        setError(t('passwordTooShort'));
+      if (password.length < 4) {
+        setError('پین‌کد یا گذرواژه باید حداقل ۴ کاراکتر باشد');
         return;
       }
       if (password !== confirmPassword) {
-        setError(t('passwordsDoNotMatch'));
+        setError('تکرار پین‌کد با رمز اصلی مطابقت ندارد');
         return;
       }
       setIsLoading(true);
@@ -77,10 +79,10 @@ export const UnlockScreen: React.FC<UnlockScreenProps> = ({
       try {
         const success = await onUnlock(password);
         if (!success) {
-          setError(t('incorrectPassword'));
+          setError('پین‌کد یا گذرواژه واردشده اشتباه است');
         }
       } catch {
-        setError(t('incorrectPassword'));
+        setError('پین‌کد یا گذرواژه واردشده اشتباه است');
       } finally {
         setIsLoading(false);
       }
@@ -94,10 +96,10 @@ export const UnlockScreen: React.FC<UnlockScreenProps> = ({
     try {
       const ok = await onBiometricUnlock();
       if (!ok) {
-        setError(t('incorrectPassword'));
+        setError('احراز هویت بیومتریک تایید نشد');
       }
     } catch {
-      setError(t('incorrectPassword'));
+      setError('احراز هویت بیومتریک تایید نشد');
     } finally {
       setIsLoading(false);
     }
@@ -105,18 +107,20 @@ export const UnlockScreen: React.FC<UnlockScreenProps> = ({
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center p-3.5 sm:p-4 bg-gradient-to-b from-[#fffcfc] via-[#fcf2f2] to-[#fffcfc] text-[#2b1313]">
-      <div className="w-full max-w-md rounded-2xl sm:rounded-3xl border border-[#efdcdc] bg-white p-6 sm:p-8 shadow-[0_20px_40px_-15px_rgba(90,20,20,0.12)]">
+      <div className="w-full max-w-sm rounded-3xl border border-[#efdcdc] bg-white p-6 sm:p-8 shadow-[0_16px_40px_-12px_rgba(90,20,20,0.14)]">
         {/* Brand Icon & Heading */}
         <div className="flex flex-col items-center text-center">
-          <div className="flex h-16 w-16 sm:h-18 sm:w-18 items-center justify-center rounded-2xl bg-gradient-to-tr from-[#7d2323] to-[#5a1414] text-white shadow-lg shadow-[#5a1414]/25 mb-4">
+          <div className="flex h-16 w-16 sm:h-18 sm:w-18 items-center justify-center rounded-2xl bg-gradient-to-tr from-[#7d2323] to-[#390a0a] text-white shadow-lg shadow-[#5a1414]/25 mb-4">
             <Shield className="h-8 w-8 sm:h-9 sm:w-9" />
           </div>
 
-          <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight text-[#5a1414]">
-            {isFirstRun ? t('setupVaultTitle') : t('appName')}
+          <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight text-[#2b1313]">
+            {isFirstRun ? 'تنظیم پین‌کد گاوصندوق' : 'بازگشایی کلیدبان'}
           </h1>
-          <p className="mt-2 text-xs text-[#7b6464] max-w-sm leading-relaxed">
-            {isFirstRun ? t('setupVaultDesc') : t('appSubtitle')}
+          <p className="mt-1.5 text-xs text-[#7b6464] max-w-xs leading-relaxed">
+            {isFirstRun
+              ? 'یک پین‌کد یا گذرواژه امن برای رمزنگاری بومی حساب‌ها با AES-GCM تعیین کنید.'
+              : 'برای دسترسی به کدهای یک‌بارمصرف، پین‌کد خود را وارد نمایید.'}
           </p>
         </div>
 
@@ -128,10 +132,10 @@ export const UnlockScreen: React.FC<UnlockScreenProps> = ({
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+        <form onSubmit={handleSubmit} className="mt-5 space-y-4">
           <div>
             <label className="block text-xs font-semibold text-[#2b1313] mb-1.5">
-              {t('masterPassword')}
+              {isFirstRun ? 'پین‌کد / گذرواژه جدید' : 'پین‌کد یا گذرواژه'}
             </label>
             <div className="relative">
               <input
@@ -139,78 +143,91 @@ export const UnlockScreen: React.FC<UnlockScreenProps> = ({
                 autoFocus
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder={t('masterPasswordPlaceholder')}
+                placeholder={isFirstRun ? 'حداقل ۴ رقم یا کاراکتر' : 'پین‌کد خود را وارد کنید'}
                 required
-                className="w-full rounded-xl border border-[#efdcdc] bg-[#fcf2f2] px-4 py-3.5 text-base sm:text-sm text-[#2b1313] placeholder-[#7b6464]/60 focus:bg-white focus:border-[#5a1414] focus:outline-none transition"
+                className="w-full rounded-xl border border-[#efdcdc] bg-[#fcf2f2] px-4 py-3.5 text-center text-lg font-mono tracking-widest text-[#2b1313] placeholder-[#7b6464]/50 focus:bg-white focus:border-[#5a1414] focus:ring-1 focus:ring-[#f2c6c6] focus:outline-none transition shadow-sm"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute end-3.5 top-3.5 text-[#7b6464] hover:text-[#2b1313] active:scale-90 transition p-1"
+                className="absolute end-3 top-3.5 text-[#7b6464] hover:text-[#2b1313] active:scale-90 transition p-1"
                 aria-label="نمایش گذرواژه"
               >
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             </div>
-
-            {/* Password strength bar for first run */}
-            {isFirstRun && password.length > 0 && (
-              <div className="mt-2 space-y-1">
-                <div className="flex h-1.5 w-full overflow-hidden rounded-full bg-[#efdcdc]">
-                  <div
-                    className={`h-full transition-all duration-300 ${
-                      strength <= 1
-                        ? 'w-1/4 bg-rose-600'
-                        : strength === 2
-                        ? 'w-2/4 bg-amber-500'
-                        : strength === 3
-                        ? 'w-3/4 bg-sky-500'
-                        : 'w-full bg-emerald-500'
-                    }`}
-                  />
-                </div>
-                <p className="text-[11px] text-[#7b6464]">
-                  {strength < 2 ? 'گذرواژه ضعیف' : strength === 2 ? 'متوسط' : 'بسیار قوی و ایمن'}
-                </p>
-              </div>
-            )}
           </div>
 
           {isFirstRun && (
             <div>
               <label className="block text-xs font-semibold text-[#2b1313] mb-1.5">
-                {t('confirmPassword')}
+                تکرار پین‌کد
               </label>
               <input
                 type={showPassword ? 'text' : 'password'}
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder={t('confirmPasswordPlaceholder')}
+                placeholder="پین‌کد را مجدداً وارد نمایید"
                 required
-                className="w-full rounded-xl border border-[#efdcdc] bg-[#fcf2f2] px-4 py-3.5 text-base sm:text-sm text-[#2b1313] placeholder-[#7b6464]/60 focus:bg-white focus:border-[#5a1414] focus:outline-none transition"
+                className="w-full rounded-xl border border-[#efdcdc] bg-[#fcf2f2] px-4 py-3.5 text-center text-lg font-mono tracking-widest text-[#2b1313] placeholder-[#7b6464]/50 focus:bg-white focus:border-[#5a1414] focus:ring-1 focus:ring-[#f2c6c6] focus:outline-none transition shadow-sm"
               />
             </div>
           )}
 
+          {/* Quick iOS-style Keypad for mobile convenience */}
+          <div className="grid grid-cols-3 gap-2 pt-1">
+            {['1', '2', '3', '4', '5', '6', '7', '8', '9'].map((digit) => (
+              <button
+                key={digit}
+                type="button"
+                onClick={() => handleKeypadPress(digit)}
+                className="flex h-12 items-center justify-center rounded-xl bg-[#fcf2f2] border border-[#efdcdc] text-lg font-bold text-[#2b1313] hover:bg-[#f2c6c6]/50 active:scale-95 transition"
+              >
+                {digit}
+              </button>
+            ))}
+            <button
+              type="button"
+              onClick={() => setPassword('')}
+              className="flex h-12 items-center justify-center rounded-xl bg-white border border-[#efdcdc] text-xs font-semibold text-[#7b6464] hover:bg-[#fcf2f2] active:scale-95 transition"
+            >
+              پاک کردن
+            </button>
+            <button
+              type="button"
+              onClick={() => handleKeypadPress('0')}
+              className="flex h-12 items-center justify-center rounded-xl bg-[#fcf2f2] border border-[#efdcdc] text-lg font-bold text-[#2b1313] hover:bg-[#f2c6c6]/50 active:scale-95 transition"
+            >
+              0
+            </button>
+            <button
+              type="button"
+              onClick={handleKeypadBackspace}
+              className="flex h-12 items-center justify-center rounded-xl bg-white border border-[#efdcdc] text-xs font-semibold text-[#7b6464] hover:bg-[#fcf2f2] active:scale-95 transition"
+            >
+              ⌫
+            </button>
+          </div>
+
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#7d2323] via-[#5a1414] to-[#390a0a] py-3.5 text-sm font-bold text-white shadow-lg shadow-[#5a1414]/25 hover:brightness-105 transition active:scale-[0.99] disabled:opacity-50"
+            className="w-full flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#7d2323] via-[#5a1414] to-[#390a0a] py-3.5 text-sm font-bold text-white shadow-md shadow-[#5a1414]/25 hover:brightness-105 transition active:scale-[0.99] disabled:opacity-50"
           >
             {isLoading ? (
               <>
                 <RefreshCw className="h-4 w-4 animate-spin" />
-                <span>{t('unlocking')}</span>
+                <span>در حال بررسی...</span>
               </>
             ) : isFirstRun ? (
               <>
                 <KeyRound className="h-4 w-4" />
-                <span>{t('createVault')}</span>
+                <span>فعال‌سازی قفل و ورود</span>
               </>
             ) : (
               <>
                 <Lock className="h-4 w-4" />
-                <span>{t('unlockButton')}</span>
+                <span>بازگشایی برنامه</span>
               </>
             )}
           </button>
@@ -221,20 +238,31 @@ export const UnlockScreen: React.FC<UnlockScreenProps> = ({
               type="button"
               onClick={handleBiometrics}
               disabled={isLoading}
-              className="w-full flex items-center justify-center gap-2 rounded-full border border-[#efdcdc] bg-[#fcf2f2] py-3 text-xs font-semibold text-[#5a1414] hover:bg-white transition"
+              className="w-full flex items-center justify-center gap-2 rounded-full border border-[#f2c6c6] bg-[#fcf2f2] py-3 text-xs font-semibold text-[#5a1414] hover:bg-[#f2c6c6]/50 transition"
             >
               <Fingerprint className="h-4 w-4" />
-              <span>{t('unlockWithBiometrics')}</span>
+              <span>بازگشایی با Face ID / اثر انگشت</span>
+            </button>
+          )}
+
+          {/* Option to skip PIN on first run for quick access */}
+          {isFirstRun && onSkipPin && (
+            <button
+              type="button"
+              onClick={onSkipPin}
+              className="w-full text-center py-2 text-xs font-semibold text-[#7b6464] hover:text-[#5a1414] transition"
+            >
+              ورود مستقیم بدون پین‌کد (قابل تنظیم بعداً)
             </button>
           )}
         </form>
 
         {/* Reset Vault option if user forgot password */}
         {!isFirstRun && onResetVault && (
-          <div className="mt-5 text-center">
+          <div className="mt-4 text-center">
             {showResetConfirm ? (
-              <div className="rounded-xl border border-rose-200 bg-rose-50 p-3.5 text-xs text-rose-800 space-y-2.5">
-                <p>در صورت فراموشی گذرواژه، داده‌ها قابل بازیابی نیستند. آیا مایل به بازنشانی کامل گاوصندوق هستید؟</p>
+              <div className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs text-rose-800 space-y-2">
+                <p>با بازنشانی کامل، کلیه حساب‌ها پاک خواهند شد. ادامه می‌دهید؟</p>
                 <div className="flex justify-center gap-2">
                   <button
                     onClick={() => setShowResetConfirm(false)}
@@ -256,7 +284,7 @@ export const UnlockScreen: React.FC<UnlockScreenProps> = ({
                 onClick={() => setShowResetConfirm(true)}
                 className="text-xs text-[#7b6464] hover:text-[#5a1414] transition"
               >
-                گذرواژه اصلی را فراموش کرده‌اید؟
+                پین‌کد خود را فراموش کرده‌اید؟
               </button>
             )}
           </div>
@@ -270,7 +298,7 @@ export const UnlockScreen: React.FC<UnlockScreenProps> = ({
               onClick={onOpenLanding}
               className="text-xs font-semibold text-[#7b6464] hover:text-[#5a1414] transition inline-flex items-center gap-1.5"
             >
-              <span>بازگشت به صفحه معرفی و راهنما</span>
+              <span>مشاهده راهنما و امکانات</span>
               <span className="text-sm">←</span>
             </button>
           </div>

@@ -1,35 +1,6 @@
 @import "tailwindcss";
 
-@custom-variant dark (&:where(.dark, .dark *));
-
-@font-face {
-  font-family: 'Vazirmatn';
-  src: url('/fonts/Vazirmatn-Regular.woff2') format('woff2');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Vazirmatn';
-  src: url('/fonts/Vazirmatn-Medium.woff2') format('woff2');
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Vazirmatn';
-  src: url('/fonts/Vazirmatn-Bold.woff2') format('woff2');
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-
 :root {
-  --font-sans: 'Vazirmatn', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-
   /* Landing page color theme (#5a1414 signature palette) */
   --p: #5a1414;
   --pd: #390a0a;
@@ -42,43 +13,69 @@
   --mut: #7b6464;
   --line: #efdcdc;
   --ok: #2f8f5b;
+  --ease: cubic-bezier(.22, .9, .3, 1);
+  --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Courier New", monospace;
+
+  /* Font stack */
+  --font-sans: "KB", Tahoma, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: var(--mono);
 }
 
 html {
   font-family: var(--font-sans);
-  -webkit-tap-highlight-color: transparent;
-  user-select: none;
+  direction: rtl;
   background-color: var(--t3);
   color: var(--ink);
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  user-select: none;
+  -webkit-user-select: none;
+  overscroll-behavior-y: none;
 }
 
-/* Allow text selection only in code and input areas */
-input, textarea, [data-selectable="true"] {
-  user-select: text;
-}
-
-/* Smooth animations and mobile safe areas */
 body {
+  margin: 0;
+  padding: 0;
   min-height: 100vh;
   min-height: 100dvh;
-  padding-bottom: env(safe-area-inset-bottom, 0px);
   padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
   overflow-x: hidden;
   background-color: var(--t3);
   color: var(--ink);
 }
 
-/* Monospace numeric style for OTP codes */
+/* Allow text selection only in inputs and OTP code copy targets */
+input, textarea, [data-selectable="true"] {
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+/* Monospace numeric style for OTP digits */
 .font-otp {
-  font-family: var(--font-mono);
+  font-family: var(--mono);
   letter-spacing: 0.16em;
   font-variant-numeric: tabular-nums;
 }
 
-/* Touch ripple and smooth mobile touch feedback */
+/* Touch targets */
 .touch-target {
   min-width: 44px;
   min-height: 44px;
 }
 
-
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--t2);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--p);
+}

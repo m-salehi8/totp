@@ -61,14 +61,17 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
 
         try {
-            // Dark crimson theme system bars matching landing page
+            // Crimson and cream theme matching landing page
             Window window = getWindow();
             window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-            window.setStatusBarColor(Color.parseColor("#120404"));
-            window.setNavigationBarColor(Color.parseColor("#120404"));
+            window.setStatusBarColor(Color.parseColor("#5a1414"));
+            window.setNavigationBarColor(Color.parseColor("#fffcfc"));
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                window.getDecorView().setSystemUiVisibility(android.view.View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
+            }
 
             webView = new WebView(this);
-            webView.setBackgroundColor(Color.parseColor("#120404"));
+            webView.setBackgroundColor(Color.parseColor("#fffcfc"));
             setContentView(webView);
 
             WebSettings settings = webView.getSettings();
@@ -176,8 +179,8 @@ public class MainActivity extends Activity {
                 }
             });
 
-            // Load entry index.html via safe https virtual origin
-            webView.loadUrl("https://appassets.androidplatform.net/index.html");
+            // Load entry index.html#app via safe https virtual origin
+            webView.loadUrl("https://appassets.androidplatform.net/index.html#app");
 
         } catch (Throwable t) {
             Log.e(TAG, "Fatal error initializing WebView", t);

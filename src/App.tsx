@@ -7,8 +7,10 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import type { AppSettings, EncryptedPayload, OtpAccount, VaultData } from './domain/types';
 import {
   loadEncryptedVault,
+  loadPlainAccounts,
   loadSettings,
   saveEncryptedVault,
+  savePlainAccounts,
   saveSettings,
   deleteVault,
   requestPersistentStorage,
@@ -23,8 +25,9 @@ import { AddAccountModal } from './components/AddAccountModal';
 import { EditAccountModal } from './components/EditAccountModal';
 import { SettingsModal } from './components/SettingsModal';
 import { DeleteConfirmModal } from './components/DeleteConfirmModal';
+import { IOSInstallGuide } from './components/IOSInstallGuide';
 import { LandingPage } from './components/LandingPage';
-import { Plus, Shield, KeyRound } from 'lucide-react';
+import { Plus, Shield, KeyRound, Check, Sparkles } from 'lucide-react';
 
 function AuthenticatorApp({ onOpenLanding }: { onOpenLanding?: () => void }) {
   const { t } = useI18n();
@@ -40,9 +43,11 @@ function AuthenticatorApp({ onOpenLanding }: { onOpenLanding?: () => void }) {
     hideCodesByDefault: false,
     clipboardClearSeconds: 30,
     biometricsEnabled: false,
+    pinEnabled: false,
+    dismissedIosGuide: false,
   });
 
-  // Master key in memory
+  // Master key in memory (when vault is encrypted)
   const memoryKeyRef = useRef<{
     key: CryptoKey;
     saltBase64: string;
@@ -52,6 +57,9 @@ function AuthenticatorApp({ onOpenLanding }: { onOpenLanding?: () => void }) {
 
   // Search & Filter
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Toast notification
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // Modals
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -65,28 +73,48 @@ function AuthenticatorApp({ onOpenLanding }: { onOpenLanding?: () => void }) {
   // Activity timer for auto-lock
   const lastActivityRef = useRef<number>(Date.now());
 
+  // Show Toast Helper
+  const showToast = useCallback((msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => {
+      setToastMessage((current) => (current === msg ? null : current));
+    }, 2200);
+  }, []);
+
   // Lock the vault and scrub memory
   const handleLockVault = useCallback(() => {
-    setIsUnlocked(false);
-    memoryKeyRef.current = null;
-  }, []);
+    if (encryptedPayload) {
+      setIsUnlocked(false);
+      memoryKeyRef.current = null;
+    }
+  }, [encryptedPayload]);
 
   // Initialize DB and load settings/vault
   useEffect(() => {
     const init = async () => {
       try {
-        const [savedSettings, vaultPayload] = await Promise.all([
+        const [savedSettings, vaultPayload, plainAccs] = await Promise.all([
           loadSettings(),
           loadEncryptedVault(),
+          loadPlainAccounts(),
         ]);
 
         if (savedSettings) {
           setSettings(savedSettings);
         }
 
-        setEncryptedPayload(vaultPayload);
+        if (vaultPayload) {
+          setEncryptedPayload(vaultPayload);
+          setIsUnlocked(false);
+        } else if (plainAccs) {
+          setAccounts(plainAccs);
+          setIsUnlocked(true);
+        } else {
+          // First run - check if user wants PIN or direct access
+          setIsUnlocked(false);
+        }
 
-        // Check storage persistence silently
+        // Request Persistent Storage in iOS / modern browser
         requestPersistentStorage().catch(() => {});
       } catch (err) {
         console.error('Initialization error:', err);
@@ -106,7 +134,7 @@ function AuthenticatorApp({ onOpenLanding }: { onOpenLanding?: () => void }) {
 
   // Auto-lock on idle timer
   useEffect(() => {
-    if (!isUnlocked || settings.autoLockMinutes <= 0) return;
+    if (!isUnlocked || !encryptedPayload || settings.autoLockMinutes <= 0) return;
 
     const checkIdle = () => {
       const elapsedMinutes = (Date.now() - lastActivityRef.current) / (1000 * 60);
@@ -130,11 +158,11 @@ function AuthenticatorApp({ onOpenLanding }: { onOpenLanding?: () => void }) {
       window.removeEventListener('keydown', updateActivity);
       window.removeEventListener('touchstart', updateActivity);
     };
-  }, [isUnlocked, settings.autoLockMinutes, handleLockVault]);
+  }, [isUnlocked, encryptedPayload, settings.autoLockMinutes, handleLockVault]);
 
   // Auto-lock when tab is hidden
   useEffect(() => {
-    if (!isUnlocked || !settings.lockOnTabHidden) return;
+    if (!isUnlocked || !encryptedPayload || !settings.lockOnTabHidden) return;
 
     const handleVisibilityChange = () => {
       if (document.hidden) {
@@ -146,41 +174,42 @@ function AuthenticatorApp({ onOpenLanding }: { onOpenLanding?: () => void }) {
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [isUnlocked, settings.lockOnTabHidden, handleLockVault]);
+  }, [isUnlocked, encryptedPayload, settings.lockOnTabHidden, handleLockVault]);
 
-  // Save vault helper
+  // Save accounts helper (handles both encrypted vault & plain accounts in IndexedDB)
   const persistVault = async (updatedAccounts: OtpAccount[]) => {
-    if (!memoryKeyRef.current) return;
+    if (encryptedPayload && memoryKeyRef.current) {
+      const vaultData: VaultData = {
+        version: 1,
+        updatedAt: Date.now(),
+        accounts: updatedAccounts,
+      };
 
-    const vaultData: VaultData = {
-      version: 1,
-      updatedAt: Date.now(),
-      accounts: updatedAccounts,
-    };
+      const newEncrypted = await encryptVault(vaultData, {
+        key: memoryKeyRef.current.key,
+        saltBase64: memoryKeyRef.current.saltBase64,
+        iterations: memoryKeyRef.current.iterations,
+      });
 
-    const newEncrypted = await encryptVault(vaultData, {
-      key: memoryKeyRef.current.key,
-      saltBase64: memoryKeyRef.current.saltBase64,
-      iterations: memoryKeyRef.current.iterations,
-    });
-
-    await saveEncryptedVault(newEncrypted);
-    setEncryptedPayload(newEncrypted);
+      await saveEncryptedVault(newEncrypted);
+      setEncryptedPayload(newEncrypted);
+    } else {
+      await savePlainAccounts(updatedAccounts);
+    }
   };
 
-  // Setup Vault (First Run)
+  // Setup Vault with PIN (First Run)
   const handleSetupVault = async (masterPassword: string) => {
     const initialVault: VaultData = {
       version: 1,
       updatedAt: Date.now(),
-      accounts: [],
+      accounts: accounts.length > 0 ? accounts : [],
     };
 
     const encrypted = await encryptVault(initialVault, masterPassword);
     await saveEncryptedVault(encrypted);
     setEncryptedPayload(encrypted);
 
-    // Decrypt and keep in memory
     const { key, vault } = await decryptVault(encrypted, masterPassword);
     memoryKeyRef.current = {
       key,
@@ -191,6 +220,16 @@ function AuthenticatorApp({ onOpenLanding }: { onOpenLanding?: () => void }) {
 
     setAccounts(vault.accounts);
     setIsUnlocked(true);
+    await handleSaveSettings({ ...settings, pinEnabled: true });
+    requestPersistentStorage();
+    showToast('گاوصندوق با موفقیت رمزنگاری شد');
+  };
+
+  // Skip PIN on first run for instant quick access
+  const handleSkipPin = async () => {
+    await savePlainAccounts(accounts);
+    setIsUnlocked(true);
+    await handleSaveSettings({ ...settings, pinEnabled: false });
     requestPersistentStorage();
   };
 
@@ -228,15 +267,11 @@ function AuthenticatorApp({ onOpenLanding }: { onOpenLanding?: () => void }) {
     if (!encryptedPayload) return false;
 
     try {
-      // 1. Verify old password
       const { vault } = await decryptVault(encryptedPayload, oldPass);
-
-      // 2. Encrypt under new password with fresh salt
       const newEncrypted = await encryptVault(vault, newPass);
       await saveEncryptedVault(newEncrypted);
       setEncryptedPayload(newEncrypted);
 
-      // 3. Update memory key
       const { key } = await decryptVault(newEncrypted, newPass);
       memoryKeyRef.current = {
         key,
@@ -245,6 +280,27 @@ function AuthenticatorApp({ onOpenLanding }: { onOpenLanding?: () => void }) {
         rawPassword: newPass,
       };
 
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  // Enable PIN lock from Settings
+  const handleEnablePinLock = async (pin: string): Promise<void> => {
+    await handleSetupVault(pin);
+  };
+
+  // Disable PIN lock from Settings
+  const handleDisablePinLock = async (currentPin: string): Promise<boolean> => {
+    if (!encryptedPayload) return false;
+
+    try {
+      const { vault } = await decryptVault(encryptedPayload, currentPin);
+      await savePlainAccounts(vault.accounts);
+      setEncryptedPayload(null);
+      memoryKeyRef.current = null;
+      await handleSaveSettings({ ...settings, pinEnabled: false });
       return true;
     } catch {
       return false;
@@ -275,6 +331,7 @@ function AuthenticatorApp({ onOpenLanding }: { onOpenLanding?: () => void }) {
     const updated = [newAccount, ...accounts];
     setAccounts(updated);
     await persistVault(updated);
+    showToast('حساب جدید اضافه شد');
   };
 
   // Edit Account
@@ -283,6 +340,7 @@ function AuthenticatorApp({ onOpenLanding }: { onOpenLanding?: () => void }) {
     setAccounts(updated);
     await persistVault(updated);
     setEditingAccount(null);
+    showToast('تغییرات ذخیره شد');
   };
 
   // Delete Account
@@ -291,6 +349,7 @@ function AuthenticatorApp({ onOpenLanding }: { onOpenLanding?: () => void }) {
     setAccounts(updated);
     await persistVault(updated);
     setDeletingAccount(null);
+    showToast('حساب حذف شد');
   };
 
   // Move Up / Down
@@ -363,6 +422,7 @@ function AuthenticatorApp({ onOpenLanding }: { onOpenLanding?: () => void }) {
     const merged = [...accounts, ...sanitized];
     setAccounts(merged);
     await persistVault(merged);
+    showToast(`${sanitized.length} حساب وارد شد`);
   };
 
   // Filter accounts by search query
@@ -383,13 +443,14 @@ function AuthenticatorApp({ onOpenLanding }: { onOpenLanding?: () => void }) {
     );
   }
 
-  // Not unlocked -> show Master Password Unlock / Setup screen
+  // Not unlocked -> show Master Password / PIN Unlock or Initial Setup screen
   if (!isUnlocked) {
     return (
       <UnlockScreen
-        isFirstRun={!encryptedPayload}
+        isFirstRun={!encryptedPayload && accounts.length === 0}
         onUnlock={handleUnlock}
         onSetupVault={handleSetupVault}
+        onSkipPin={handleSkipPin}
         onBiometricUnlock={settings.biometricsEnabled ? handleBiometricUnlock : undefined}
         hasBiometrics={settings.biometricsEnabled}
         onResetVault={encryptedPayload ? handleResetVault : undefined}
@@ -408,67 +469,80 @@ function AuthenticatorApp({ onOpenLanding }: { onOpenLanding?: () => void }) {
         onOpenSettingsModal={() => setIsSettingsModalOpen(true)}
         onLockVault={handleLockVault}
         onOpenLanding={onOpenLanding}
+        hasPinLock={Boolean(encryptedPayload)}
       />
 
       {/* Main Content Area */}
-      <main className="mx-auto w-full max-w-5xl flex-1 px-3 sm:px-4 py-3.5 sm:py-5 pb-[calc(env(safe-area-inset-bottom,0px)+7rem)] sm:pb-8">
+      <main className="mx-auto w-full max-w-5xl flex-1 px-3.5 sm:px-4 py-4 sm:py-6 pb-[calc(env(safe-area-inset-bottom,0px)+6.5rem)] sm:pb-8">
         {filteredAccounts.length === 0 ? (
-          <div className="flex flex-col items-center justify-center rounded-2xl sm:rounded-3xl border border-[#efdcdc] bg-white px-5 sm:px-6 py-12 sm:py-20 text-center shadow-[0_8px_24px_-12px_rgba(90,20,20,0.12)]">
+          <div className="flex flex-col items-center justify-center rounded-3xl border border-[#efdcdc] bg-white px-5 sm:px-6 py-12 sm:py-20 text-center shadow-sm">
             <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#fcf2f2] border border-[#efdcdc] text-[#5a1414] mb-4 shadow-sm">
               <KeyRound className="h-8 w-8" />
             </div>
 
             <h2 className="text-base sm:text-lg font-bold text-[#2b1313] mb-1">
-              {searchQuery ? 'حسابی یافت نشد' : t('noAccounts')}
+              {searchQuery ? 'حسابی یافت نشد' : 'هنوز حسابی اضافه نکرده‌اید'}
             </h2>
             <p className="text-xs text-[#7b6464] max-w-xs mb-6 leading-relaxed">
               {searchQuery
                 ? 'نتیجه‌ای متناسب با عبارت جستجو پیدا نشد.'
-                : t('noAccountsDesc')}
+                : 'برای تولید کدهای ورود دوعاملی (TOTP)، حساب سازمانی یا شخصی خود را اسکن یا وارد کنید.'}
             </p>
 
             <button
               onClick={() => setIsAddModalOpen(true)}
-              className="flex items-center gap-2 rounded-full bg-gradient-to-r from-[#7d2323] via-[#5a1414] to-[#390a0a] px-6 py-3.5 text-xs sm:text-sm font-bold text-white shadow-lg shadow-[#5a1414]/25 hover:brightness-105 transition active:scale-95"
+              className="flex items-center gap-2 rounded-full bg-gradient-to-r from-[#7d2323] via-[#5a1414] to-[#390a0a] px-6 py-3 text-sm font-bold text-white shadow-md shadow-[#5a1414]/25 hover:brightness-105 active:scale-95 transition"
             >
-              <Plus className="h-4 w-4" />
-              <span>{t('addAccount')}</span>
+              <Plus className="h-4 w-4 stroke-[2.5]" />
+              <span>افزودن نخستین حساب</span>
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-3.5">
-            {filteredAccounts.map((account, index) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+            {filteredAccounts.map((acc, index) => (
               <AccountCard
-                key={account.id}
-                account={account}
+                key={acc.id}
+                account={acc}
                 index={index}
                 totalCount={filteredAccounts.length}
                 hideCodesByDefault={settings.hideCodesByDefault}
                 clipboardClearSeconds={settings.clipboardClearSeconds}
                 onEdit={setEditingAccount}
                 onDelete={setDeletingAccount}
-                onMoveUp={(acc) => handleMoveAccount(acc, 'up')}
-                onMoveDown={(acc) => handleMoveAccount(acc, 'down')}
+                onMoveUp={(a) => handleMoveAccount(a, 'up')}
+                onMoveDown={(a) => handleMoveAccount(a, 'down')}
                 onUpdateCounter={handleUpdateCounter}
                 onDragStart={handleDragStart}
                 onDragOver={handleDragOver}
                 onDrop={handleDrop}
+                onShowToast={showToast}
               />
             ))}
           </div>
         )}
       </main>
 
-      {/* Floating Add Button for Mobile (Thumb-accessible, large 56x56px matching landing mockup) */}
-      <div className="fixed bottom-[calc(env(safe-area-inset-bottom,0px)+1.5rem)] end-5 z-30 sm:hidden">
+      {/* Floating Action Button (FAB) on mobile for quick Add Account */}
+      <div className="fixed end-4 bottom-[calc(env(safe-area-inset-bottom,0px)+1.25rem)] z-30 sm:hidden">
         <button
           onClick={() => setIsAddModalOpen(true)}
-          aria-label={t('addAccount')}
-          className="flex h-14 w-14 items-center justify-center rounded-[18px] bg-[#5a1414] text-white shadow-[0_10px_20px_-8px_rgba(90,20,20,0.7)] active:scale-90 hover:brightness-110 transition border border-white/20"
+          className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-tr from-[#7d2323] to-[#390a0a] text-white shadow-lg shadow-[#5a1414]/35 active:scale-90 transition"
+          aria-label="افزودن حساب جدید"
         >
-          <Plus className="h-7 w-7" />
+          <Plus className="h-7 w-7 stroke-[2.5]" />
         </button>
       </div>
+
+      {/* iOS Installation Guide Banner */}
+      <IOSInstallGuide />
+
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div className="fixed bottom-20 sm:bottom-6 inset-x-0 mx-auto w-max max-w-[90vw] z-50 flex items-center gap-2 rounded-full bg-[#2b1313] border border-[#5a1414]/30 px-4 py-2.5 text-xs font-semibold text-white shadow-xl animate-in fade-in slide-in-from-bottom-2 duration-200">
+          <Check className="h-4 w-4 text-[#f2c6c6]" />
+          <span>{toastMessage}</span>
+        </div>
+      )}
 
       {/* Add Account Modal */}
       <AddAccountModal
@@ -502,7 +576,10 @@ function AuthenticatorApp({ onOpenLanding }: { onOpenLanding?: () => void }) {
         onSaveSettings={handleSaveSettings}
         accounts={accounts}
         onChangeMasterPassword={handleChangeMasterPassword}
+        onEnablePinLock={handleEnablePinLock}
+        onDisablePinLock={handleDisablePinLock}
         onImportAccounts={handleImportAccounts}
+        hasEncryptedVault={Boolean(encryptedPayload)}
       />
     </div>
   );
@@ -510,9 +587,16 @@ function AuthenticatorApp({ onOpenLanding }: { onOpenLanding?: () => void }) {
 
 export default function App() {
   const [currentView, setCurrentView] = useState<'landing' | 'app'>(() => {
-    if (typeof window !== 'undefined' && window.location.hash === '#app') {
-      return 'app';
+    if (typeof window !== 'undefined') {
+      if (
+        window.location.hash === '#app' ||
+        window.location.hostname === 'appassets.androidplatform.net' ||
+        (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches)
+      ) {
+        return 'app';
+      }
     }
+    // Default directly to the Landing Page in normal browser visits
     return 'landing';
   });
 
@@ -520,7 +604,7 @@ export default function App() {
     const handleHashChange = () => {
       if (window.location.hash === '#app') {
         setCurrentView('app');
-      } else if (!window.location.hash || window.location.hash === '#' || window.location.hash === '#top') {
+      } else {
         setCurrentView('landing');
       }
     };
@@ -535,7 +619,7 @@ export default function App() {
   };
 
   const handleOpenLanding = () => {
-    window.location.hash = '';
+    window.location.hash = '#landing';
     setCurrentView('landing');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };

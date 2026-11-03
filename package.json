@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite --port=3000 --host=0.0.0.0",
-    "build": "vite build && (cp -f public/totp-authenticator.apk dist/totp-authenticator.apk 2>/dev/null || true)",
-    "build:apk": "npm run build && rm -rf android/app/src/main/assets && mkdir -p android/app/src/main/assets && cp -r dist/* android/app/src/main/assets/ && rm -f android/app/src/main/assets/totp-authenticator.apk && cd android && gradle assembleRelease && cp app/build/outputs/apk/release/app-release.apk ../public/totp-authenticator.apk && cp app/build/outputs/apk/release/app-release.apk ../dist/totp-authenticator.apk",
+    "build": "vite build && python3 scripts/rebuild_apk.py",
+    "build:apk": "npm run build",
     "preview": "vite preview",
     "test": "tsx --test src/domain/totp.test.ts src/crypto/crypto.test.ts",
     "clean": "rm -rf dist server.js",

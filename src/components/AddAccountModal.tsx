@@ -6,7 +6,6 @@ import {
   KeyRound,
   X,
   AlertCircle,
-  CheckCircle2,
   ScanLine,
 } from 'lucide-react';
 import jsQR from 'jsqr';
@@ -119,7 +118,6 @@ export const AddAccountModal: React.FC<AddAccountModalProps> = ({
     if (ctx) {
       ctx.drawImage(video, 0, 0, width, height);
 
-      // 1. Try native BarcodeDetector if available
       let foundCode = '';
       if ('BarcodeDetector' in window) {
         try {
@@ -133,7 +131,6 @@ export const AddAccountModal: React.FC<AddAccountModalProps> = ({
         }
       }
 
-      // 2. Fallback to jsQR
       if (!foundCode) {
         const imageData = ctx.getImageData(0, 0, width, height);
         const code = jsQR(imageData.data, imageData.width, imageData.height, {
@@ -244,7 +241,7 @@ export const AddAccountModal: React.FC<AddAccountModalProps> = ({
     e.preventDefault();
     setError('');
     if (!secret.trim()) {
-      setError(t('secretKey') + ' ' + t('noAccounts'));
+      setError(t('secretKey') + ' الزامی است');
       return;
     }
 
@@ -276,14 +273,14 @@ export const AddAccountModal: React.FC<AddAccountModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-[#2b1313]/60 sm:p-4 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="relative w-full max-w-lg rounded-t-[28px] sm:rounded-3xl border-t sm:border border-[#efdcdc] bg-white p-4 sm:p-6 shadow-[0_20px_40px_-15px_rgba(90,20,20,0.2)] overflow-hidden max-h-[92vh] sm:max-h-[90vh] flex flex-col text-[#2b1313] transition-colors">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 sm:p-4 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="relative w-full max-w-lg rounded-t-[28px] sm:rounded-3xl border-t sm:border border-[#efdcdc] bg-white p-4 sm:p-6 shadow-2xl overflow-hidden max-h-[92vh] sm:max-h-[90vh] flex flex-col text-[#2b1313] transition-colors">
         {/* Mobile drag handle */}
         <div className="mx-auto -mt-1 mb-2.5 h-1.5 w-12 rounded-full bg-[#efdcdc] sm:hidden" />
 
         {/* Header */}
         <div className="flex items-center justify-between pb-3.5 border-b border-[#efdcdc]">
-          <h2 className="text-base sm:text-lg font-bold text-[#5a1414] flex items-center gap-2">
+          <h2 className="text-base sm:text-lg font-bold text-[#2b1313] flex items-center gap-2">
             <KeyRound className="h-5 w-5 text-[#5a1414]" />
             {t('addAccount')}
           </h2>
@@ -293,7 +290,7 @@ export const AddAccountModal: React.FC<AddAccountModalProps> = ({
               onClose();
             }}
             aria-label="بستن"
-            className="flex h-10 w-10 sm:h-9 sm:w-9 items-center justify-center rounded-xl bg-[#fcf2f2] border border-[#efdcdc] text-[#7b6464] hover:bg-white hover:text-[#2b1313] active:scale-90 transition"
+            className="flex h-10 w-10 sm:h-9 sm:w-9 items-center justify-center rounded-xl bg-[#fcf2f2] border border-[#efdcdc] text-[#7b6464] hover:bg-[#f2c6c6]/50 hover:text-[#2b1313] active:scale-90 transition"
           >
             <X className="h-5 w-5" />
           </button>
@@ -311,7 +308,33 @@ export const AddAccountModal: React.FC<AddAccountModalProps> = ({
             }`}
           >
             <Camera className="h-4 w-4 shrink-0" />
-            <span className="truncate">اسکن QR</span>
+            <span className="truncate">اسکن دوربین</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('image')}
+            className={`flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-1.5 py-2 px-1 rounded-lg transition-all ${
+              activeTab === 'image'
+                ? 'bg-gradient-to-r from-[#7d2323] to-[#5a1414] text-white shadow-sm'
+                : 'text-[#7b6464] hover:text-[#2b1313]'
+            }`}
+          >
+            <ImageIcon className="h-4 w-4 shrink-0" />
+            <span className="truncate">آپلود عکس QR</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('manual')}
+            className={`flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-1.5 py-2 px-1 rounded-lg transition-all ${
+              activeTab === 'manual'
+                ? 'bg-gradient-to-r from-[#7d2323] to-[#5a1414] text-white shadow-sm'
+                : 'text-[#7b6464] hover:text-[#2b1313]'
+            }`}
+          >
+            <KeyRound className="h-4 w-4 shrink-0" />
+            <span className="truncate">ورود دستی</span>
           </button>
 
           <button
@@ -325,32 +348,6 @@ export const AddAccountModal: React.FC<AddAccountModalProps> = ({
           >
             <Link className="h-4 w-4 shrink-0" />
             <span className="truncate">پیوند URI</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveTab('image')}
-            className={`flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-1.5 py-2 px-1 rounded-lg transition-all ${
-              activeTab === 'image'
-                ? 'bg-gradient-to-r from-[#7d2323] to-[#5a1414] text-white shadow-sm'
-                : 'text-[#7b6464] hover:text-[#2b1313]'
-            }`}
-          >
-            <ImageIcon className="h-4 w-4 shrink-0" />
-            <span className="truncate">تصویر QR</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveTab('manual')}
-            className={`flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-1.5 py-2 px-1 rounded-lg transition-all ${
-              activeTab === 'manual'
-                ? 'bg-gradient-to-r from-[#7d2323] to-[#5a1414] text-white shadow-sm'
-                : 'text-[#7b6464] hover:text-[#2b1313]'
-            }`}
-          >
-            <KeyRound className="h-4 w-4 shrink-0" />
-            <span className="truncate">دستی</span>
           </button>
         </div>
 
@@ -367,7 +364,7 @@ export const AddAccountModal: React.FC<AddAccountModalProps> = ({
           {/* TAB 1: Camera Scanner */}
           {activeTab === 'scan' && (
             <div className="flex flex-col items-center">
-              <div className="relative w-full aspect-square max-w-xs overflow-hidden rounded-2xl border-2 border-[#5a1414] bg-[#2b1313] flex items-center justify-center shadow-inner">
+              <div className="relative w-full aspect-square max-w-xs overflow-hidden rounded-2xl border-2 border-[#5a1414] bg-black flex items-center justify-center shadow-inner">
                 <video
                   ref={videoRef}
                   playsInline
@@ -378,52 +375,29 @@ export const AddAccountModal: React.FC<AddAccountModalProps> = ({
 
                 {/* Scanning Laser Line */}
                 {isScanning && (
-                  <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-[#d24a3a] to-transparent shadow-[0_0_12px_#d24a3a] animate-pulse" />
+                  <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-[#a63a3a] to-transparent shadow-[0_0_12px_#5a1414] animate-pulse" />
                 )}
 
                 {/* Target Corners */}
-                <div className="pointer-events-none absolute inset-6 border-2 border-dashed border-[#f2c6c6] rounded-xl" />
+                <div className="pointer-events-none absolute inset-6 border-2 border-dashed border-[#f2c6c6]/70 rounded-xl" />
               </div>
               <p className="mt-3 text-xs text-[#7b6464] text-center">
-                کد QR ارائه‌شده توسط سرویس مورد نظر را در کادر بالا قرار دهید.
+                کد QR ارائه‌شده توسط سامانه را در کادر بالا نگه دارید تا شناسایی شود.
               </p>
             </div>
           )}
 
-          {/* TAB 2: Paste URI */}
-          {activeTab === 'paste' && (
-            <form onSubmit={handlePasteSubmit} className="space-y-4">
-              <div>
-                <label className="block text-xs font-semibold text-[#2b1313] mb-1.5">
-                  آدرس otpauth://
-                </label>
-                <textarea
-                  value={uriInput}
-                  onChange={(e) => setUriInput(e.target.value)}
-                  placeholder="otpauth://totp/GitHub:user?secret=JBSWY3DPEHPK3PXP&issuer=GitHub"
-                  rows={4}
-                  dir="ltr"
-                  className="w-full rounded-xl border border-[#efdcdc] bg-[#fcf2f2] p-3 text-base sm:text-xs text-[#2b1313] placeholder-[#7b6464]/60 focus:bg-white focus:border-[#5a1414] focus:outline-none font-mono"
-                />
-              </div>
-              <button
-                type="submit"
-                className="w-full rounded-full bg-gradient-to-r from-[#7d2323] via-[#5a1414] to-[#390a0a] py-3.5 text-sm font-bold text-white shadow-lg shadow-[#5a1414]/25 hover:brightness-105 transition active:scale-[0.99]"
-              >
-                {t('save')}
-              </button>
-            </form>
-          )}
-
-          {/* TAB 3: QR Image Upload */}
+          {/* TAB 2: QR Image Upload (Crucial fallback for iOS Safari) */}
           {activeTab === 'image' && (
             <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-[#efdcdc] bg-[#fcf2f2] p-6 sm:p-8 text-center hover:border-[#5a1414] transition">
-              <ImageIcon className="h-10 w-10 text-[#5a1414] mb-2" />
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white border border-[#efdcdc] text-[#5a1414] mb-3 shadow-sm">
+                <ImageIcon className="h-7 w-7" />
+              </div>
               <p className="text-sm font-semibold text-[#2b1313] mb-1">
-                تصویر کد QR را انتخاب یا بارگذاری کنید
+                انتخاب اسکرین‌شات یا عکس QR از گالری
               </p>
-              <p className="text-xs text-[#7b6464] mb-4">فرمت‌های PNG، JPG و WebP پشتیبانی می‌شوند</p>
-              <label className="cursor-pointer rounded-full bg-white border border-[#efdcdc] px-5 py-2.5 text-xs font-bold text-[#5a1414] hover:bg-[#fffcfc] transition shadow-sm">
+              <p className="text-xs text-[#7b6464] mb-4">ویژه آیفون و دستگاه‌هایی که دسترسی به دوربین محدود است</p>
+              <label className="cursor-pointer rounded-full bg-gradient-to-r from-[#7d2323] to-[#390a0a] px-5 py-2.5 text-xs font-bold text-white shadow-sm hover:brightness-105 active:scale-95 transition">
                 {t('importQrImage')}
                 <input
                   type="file"
@@ -438,32 +412,32 @@ export const AddAccountModal: React.FC<AddAccountModalProps> = ({
             </div>
           )}
 
-          {/* TAB 4: Manual Form */}
+          {/* TAB 3: Manual Form */}
           {activeTab === 'manual' && (
             <form onSubmit={handleManualSubmit} className="space-y-3.5">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-semibold text-[#2b1313] mb-1">
-                    {t('issuer')}
+                    نام سامانه / سرویس (Issuer)
                   </label>
                   <input
                     type="text"
                     value={issuer}
                     onChange={(e) => setIssuer(e.target.value)}
-                    placeholder={t('issuerPlaceholder')}
+                    placeholder="مثال: سازمان مرکزی، گوگل"
                     className="w-full rounded-xl border border-[#efdcdc] bg-[#fcf2f2] px-3.5 py-3 text-base sm:text-xs text-[#2b1313] placeholder-[#7b6464]/60 focus:bg-white focus:border-[#5a1414] focus:outline-none"
                   />
                 </div>
 
                 <div>
                   <label className="block text-xs font-semibold text-[#2b1313] mb-1">
-                    {t('accountName')}
+                    نام کاربری / ایمیل (Account)
                   </label>
                   <input
                     type="text"
                     value={account}
                     onChange={(e) => setAccount(e.target.value)}
-                    placeholder={t('accountNamePlaceholder')}
+                    placeholder="مثال: ali.rezaei@org.ir"
                     className="w-full rounded-xl border border-[#efdcdc] bg-[#fcf2f2] px-3.5 py-3 text-base sm:text-xs text-[#2b1313] placeholder-[#7b6464]/60 focus:bg-white focus:border-[#5a1414] focus:outline-none"
                   />
                 </div>
@@ -471,44 +445,44 @@ export const AddAccountModal: React.FC<AddAccountModalProps> = ({
 
               <div>
                 <label className="block text-xs font-semibold text-[#2b1313] mb-1">
-                  {t('secretKey')} *
+                  کلید امنیتی Base32 (Secret Key) *
                 </label>
                 <input
                   type="text"
                   dir="ltr"
                   value={secret}
                   onChange={(e) => setSecret(e.target.value)}
-                  placeholder={t('secretKeyPlaceholder')}
+                  placeholder="مثال: JBSWY3DPEHPK3PXP"
                   required
-                  className="w-full rounded-xl border border-[#efdcdc] bg-[#fcf2f2] px-3.5 py-3 text-base sm:text-xs font-mono text-[#2b1313] placeholder-[#7b6464]/60 focus:bg-white focus:border-[#5a1414] focus:outline-none uppercase"
+                  className="w-full rounded-xl border border-[#efdcdc] bg-[#fcf2f2] px-3.5 py-3 text-base sm:text-xs font-mono text-[#2b1313] placeholder-[#7b6464]/60 focus:bg-white focus:border-[#5a1414] focus:outline-none uppercase tracking-wide"
                 />
               </div>
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
                 <div>
                   <label className="block text-xs font-semibold text-[#2b1313] mb-1">
-                    {t('type')}
+                    نوع رمز
                   </label>
                   <select
                     value={type}
                     onChange={(e) => setType(e.target.value as OtpType)}
                     className="w-full rounded-xl border border-[#efdcdc] bg-[#fcf2f2] px-2.5 py-2.5 text-base sm:text-xs text-[#2b1313] focus:bg-white focus:border-[#5a1414] focus:outline-none"
                   >
-                    <option value="totp">TOTP (زمان)</option>
+                    <option value="totp">TOTP (زمان‌دار)</option>
                     <option value="hotp">HOTP (شمارنده)</option>
                   </select>
                 </div>
 
                 <div>
                   <label className="block text-xs font-semibold text-[#2b1313] mb-1">
-                    {t('algorithm')}
+                    الگوریتم
                   </label>
                   <select
                     value={algorithm}
                     onChange={(e) => setAlgorithm(e.target.value as HashAlgorithm)}
                     className="w-full rounded-xl border border-[#efdcdc] bg-[#fcf2f2] px-2.5 py-2.5 text-base sm:text-xs text-[#2b1313] focus:bg-white focus:border-[#5a1414] focus:outline-none"
                   >
-                    <option value="SHA-1">SHA-1</option>
+                    <option value="SHA-1">SHA-1 (استاندارد)</option>
                     <option value="SHA-256">SHA-256</option>
                     <option value="SHA-512">SHA-512</option>
                   </select>
@@ -516,21 +490,21 @@ export const AddAccountModal: React.FC<AddAccountModalProps> = ({
 
                 <div>
                   <label className="block text-xs font-semibold text-[#2b1313] mb-1">
-                    {t('digits')}
+                    تعداد ارقام
                   </label>
                   <select
                     value={digits}
                     onChange={(e) => setDigits(Number(e.target.value))}
                     className="w-full rounded-xl border border-[#efdcdc] bg-[#fcf2f2] px-2.5 py-2.5 text-base sm:text-xs text-[#2b1313] focus:bg-white focus:border-[#5a1414] focus:outline-none"
                   >
-                    <option value={6}>6 رقم</option>
-                    <option value={8}>8 رقم</option>
+                    <option value={6}>۶ رقم</option>
+                    <option value={8}>۸ رقم</option>
                   </select>
                 </div>
 
                 <div>
                   <label className="block text-xs font-semibold text-[#2b1313] mb-1">
-                    {type === 'totp' ? t('period') : t('counter')}
+                    {type === 'totp' ? 'بازه زمانی' : 'شمارنده'}
                   </label>
                   {type === 'totp' ? (
                     <input
@@ -553,11 +527,36 @@ export const AddAccountModal: React.FC<AddAccountModalProps> = ({
               <div className="pt-2">
                 <button
                   type="submit"
-                  className="w-full rounded-full bg-gradient-to-r from-[#7d2323] via-[#5a1414] to-[#390a0a] py-3.5 text-sm font-bold text-white shadow-lg shadow-[#5a1414]/25 hover:brightness-105 transition active:scale-[0.99]"
+                  className="w-full rounded-full bg-gradient-to-r from-[#7d2323] via-[#5a1414] to-[#390a0a] py-3.5 text-sm font-bold text-white shadow-md shadow-[#5a1414]/25 hover:brightness-105 transition active:scale-[0.99]"
                 >
-                  {t('save')}
+                  افزودن حساب
                 </button>
               </div>
+            </form>
+          )}
+
+          {/* TAB 4: Paste URI */}
+          {activeTab === 'paste' && (
+            <form onSubmit={handlePasteSubmit} className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-[#2b1313] mb-1.5">
+                  آدرس استاندارد otpauth://
+                </label>
+                <textarea
+                  value={uriInput}
+                  onChange={(e) => setUriInput(e.target.value)}
+                  placeholder="otpauth://totp/Service:user@domain.com?secret=JBSWY3DPEHPK3PXP&issuer=Service"
+                  rows={4}
+                  dir="ltr"
+                  className="w-full rounded-xl border border-[#efdcdc] bg-[#fcf2f2] p-3 text-base sm:text-xs text-[#2b1313] placeholder-[#7b6464]/60 focus:bg-white focus:border-[#5a1414] focus:outline-none font-mono"
+                />
+              </div>
+              <button
+                type="submit"
+                className="w-full rounded-full bg-gradient-to-r from-[#7d2323] via-[#5a1414] to-[#390a0a] py-3.5 text-sm font-bold text-white shadow-md shadow-[#5a1414]/25 hover:brightness-105 transition active:scale-[0.99]"
+              >
+                ثبت و ایجاد حساب
+              </button>
             </form>
           )}
         </div>

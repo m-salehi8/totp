@@ -1,5 +1,5 @@
 import React from 'react';
-import { AlertTriangle, Trash2, X } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 import type { OtpAccount } from '../domain/types';
 import { useI18n } from '../i18n/i18nContext';
 
@@ -21,8 +21,8 @@ export const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
   if (!isOpen || !account) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-[#2b1313]/60 sm:p-4 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="relative w-full max-w-sm rounded-t-[28px] sm:rounded-3xl border-t sm:border border-[#efdcdc] bg-white p-5 sm:p-6 shadow-[0_20px_40px_-15px_rgba(90,20,20,0.2)] text-[#2b1313] transition-colors">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 sm:p-4 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="relative w-full max-w-sm rounded-t-[28px] sm:rounded-3xl border-t sm:border border-[#efdcdc] bg-white p-5 sm:p-6 shadow-2xl text-[#2b1313] transition-colors">
         {/* Mobile drag handle */}
         <div className="mx-auto -mt-1 mb-3.5 h-1.5 w-12 rounded-full bg-[#efdcdc] sm:hidden" />
 
@@ -31,7 +31,7 @@ export const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
         </div>
 
         <h3 className="text-center text-base sm:text-lg font-bold text-[#2b1313] mb-1.5">
-          {t('deleteConfirmTitle')}
+          حذف حساب از کلیدبان
         </h3>
 
         <div className="rounded-xl bg-[#fcf2f2] p-3.5 my-3 text-center border border-[#efdcdc]">
@@ -40,16 +40,16 @@ export const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
         </div>
 
         <p className="text-xs text-[#7b6464] text-center leading-relaxed">
-          {t('deleteConfirmDesc')}
+          با حذف این حساب، امکان تولید کدهای یک‌بارمصرف برای آن وجود نخواهد داشت مگر اینکه مجدداً کد QR آن را ثبت نمایید.
         </p>
 
         <div className="mt-5 flex items-center gap-2.5">
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 rounded-full bg-[#fcf2f2] py-3.5 sm:py-2.5 text-xs sm:text-sm font-semibold text-[#7b6464] hover:bg-white active:scale-95 transition border border-[#efdcdc]"
+            className="flex-1 rounded-xl bg-[#fcf2f2] py-3 text-xs font-semibold text-[#7b6464] hover:bg-[#f2c6c6]/50 active:scale-95 transition border border-[#efdcdc]"
           >
-            {t('cancel')}
+            انصراف
           </button>
           <button
             type="button"
@@ -57,9 +57,9 @@ export const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
               onConfirm(account);
               onClose();
             }}
-            className="flex-1 rounded-full bg-rose-600 py-3.5 sm:py-2.5 text-xs sm:text-sm font-bold text-white shadow-md shadow-rose-600/30 hover:bg-rose-700 active:scale-95 transition"
+            className="flex-1 rounded-xl bg-rose-600 py-3 text-xs font-bold text-white shadow-md shadow-rose-600/25 hover:bg-rose-700 active:scale-95 transition"
           >
-            {t('delete')}
+            حذف قطعی
           </button>
         </div>
       </div>

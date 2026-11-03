@@ -12,18 +12,44 @@ export default defineConfig(() => {
         name: 'apk-downloader',
         configureServer(server) {
           server.middlewares.use((req, res, next) => {
-            if (req.url && (req.url.split('?')[0] === '/totp-authenticator.apk' || req.url.split('?')[0] === '/download/apk')) {
-              const apkPath = path.resolve(__dirname, 'public/totp-authenticator.apk');
-              if (fs.existsSync(apkPath)) {
-                const stat = fs.statSync(apkPath);
-                res.writeHead(200, {
-                  'Content-Type': 'application/vnd.android.package-archive',
-                  'Content-Length': stat.size,
-                  'Content-Disposition': 'attachment; filename="totp-authenticator.apk"',
-                  'Cache-Control': 'no-cache',
-                });
-                fs.createReadStream(apkPath).pipe(res);
-                return;
+            if (req.url) {
+              const pathname = req.url.split('?')[0];
+              if (pathname === '/totp-authenticator.apk' || pathname === '/download/apk') {
+                const apkPath = path.resolve(__dirname, 'public/totp-authenticator.apk');
+                if (fs.existsSync(apkPath)) {
+                  const stat = fs.statSync(apkPath);
+                  res.writeHead(200, {
+                    'Content-Type': 'application/vnd.android.package-archive',
+                    'Content-Length': stat.size,
+                    'Content-Disposition': 'attachment; filename="totp-authenticator.apk"',
+                    'Cache-Control': 'no-cache',
+                  });
+                  fs.createReadStream(apkPath).pipe(res);
+                  return;
+                }
+              }
+              if (pathname === '/sw.js') {
+                const swPath = path.resolve(__dirname, 'public/sw.js');
+                if (fs.existsSync(swPath)) {
+                  res.writeHead(200, {
+                    'Content-Type': 'application/javascript; charset=utf-8',
+                    'Service-Worker-Allowed': '/',
+                    'Cache-Control': 'no-cache',
+                  });
+                  fs.createReadStream(swPath).pipe(res);
+                  return;
+                }
+              }
+              if (pathname === '/manifest.json') {
+                const manifestPath = path.resolve(__dirname, 'public/manifest.json');
+                if (fs.existsSync(manifestPath)) {
+                  res.writeHead(200, {
+                    'Content-Type': 'application/manifest+json; charset=utf-8',
+                    'Cache-Control': 'no-cache',
+                  });
+                  fs.createReadStream(manifestPath).pipe(res);
+                  return;
+                }
               }
             }
             next();
@@ -48,8 +74,8 @@ export default defineConfig(() => {
           name: 'کلیدبان - رمزساز دوعاملی (Kelidban TOTP)',
           short_name: 'کلیدبان',
           description: 'رمزساز دوعاملی امن، آفلاین و متن‌باز با رمزنگاری پیشرفته و تقویم جلالی',
-          theme_color: '#0f172a',
-          background_color: '#090d16',
+          theme_color: '#5a1414',
+          background_color: '#fffcfc',
           display: 'standalone',
           orientation: 'portrait',
           start_url: '/',
@@ -76,22 +102,17 @@ export default defineConfig(() => {
           ],
         },
         workbox: {
-          globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
+          globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2,json}'],
           navigateFallback: null,
           runtimeCaching: [
             {
-              urlPattern: ({ request }) => request.mode === 'navigate',
-              handler: 'NetworkFirst',
+              urlPattern: ({ request }) => true,
+              handler: 'CacheFirst',
               options: {
-                cacheName: 'html-cache',
-                networkTimeoutSeconds: 3,
-              },
-            },
-            {
-              urlPattern: ({ request }) => request.destination === 'font' || request.destination === 'image',
-              handler: 'StaleWhileRevalidate',
-              options: {
-                cacheName: 'media-cache',
+                cacheName: 'kelidban-app-cache',
+                cacheableResponse: {
+                  statuses: [0, 200],
+                },
               },
             },
           ],
